@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة المساءلات والنماذج الرسمية - مدرسة عبدالله بن مسعود الابتدائية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #065F46;
+            --primary-dark: #044E38;
+            --bg-body: #F3F4F6;
+            --paper-bg: #FFFFFF;
+            --text-color: #111827;
+            --border-color: #111827;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-color); padding: 15px; direction: rtl; }
+
+        .app-container { max-width: 1000px; margin: 0 auto; }
+        
+        /* شريط التحكم المباشر والواتساب */
+        .control-panel { background: #FFFFFF; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #E5E7EB; }
+        .control-panel h2 { color: var(--primary-color); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid #E5E7EB; padding-bottom: 8px; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 0.9rem; }
+        .form-group select, .form-group input { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.95rem; }
+
+        .btn-whatsapp { background-color: #25D366; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.95rem; transition: 0.2s; }
+        .btn-whatsapp:hover { background-color: #128C7E; }
+
+        /* تنسيق الأوراق والمستندات الرسمية (طراز النماذج المعتمدة) */
+        .official-paper { background: var(--paper-bg); border: 2px solid var(--border-color); padding: 30px; border-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-bottom: 30px; font-size: 0.95rem; line-height: 1.7; }
+        
+        .header-official { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+        .header-official .side { text-align: right; width: 30%; font-size: 0.85rem; font-weight: 700; }
+        .header-official .center { width: 40%; }
+        .header-official .left { text-align: left; width: 30%; font-size: 0.85rem; font-weight: 700; }
+
+        .doc-title { text-align: center; font-weight: 900; font-size: 1.3rem; margin: 15px 0; text-decoration: underline; text-underline-offset: 4px; }
+        .doc-code { text-align: center; font-size: 0.85rem; font-weight: 700; margin-bottom: 15px; }
+
+        /* الجداول الرسمية داخل المستند */
+        .doc-table { width: 100%; border-collapse: collapse; margin: 15px 0; text-align: center; font-size: 0.85rem; }
+        .doc-table th, .doc-table td { border: 1px solid var(--border-color); padding: 6px; }
+        .doc-table th { background-color: #F3F4F6; font-weight: 700; }
+
+        .section-box { border: 1px solid var(--border-color); padding: 12px; margin-bottom: 15px; border-radius: 2px; }
+        .section-header { font-weight: 900; background: #F3F4F6; padding: 4px 8px; margin: -12px -12px 10px -12px; border-bottom: 1px solid var(--border-color); }
+
+        /* منطقة التوقيع بالأصبع/الماوس */
+        .sig-container { border: 1px dashed #4B5563; background: #FAFAFA; height: 100px; margin: 8px 0; position: relative; }
+        canvas { width: 100%; height: 100%; display: block; }
+        .btn-clear-sig { background: #EF4444; color: white; border: none; padding: 3px 8px; border-radius: 3px; font-size: 0.75rem; cursor: pointer; }
+
+        .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+
+        .footer-notes { font-size: 0.78rem; border-top: 1px dashed var(--border-color); padding-top: 10px; margin-top: 15px; line-height: 1.5; }
+
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { padding: 10px 20px; background: #E5E7EB; border: none; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; }
+        .tab-btn.active { background: var(--primary-color); color: white; }
+
+        .model-section { display: none; }
+        .model-section.active { display: block; }
+
+        @media print {
+            .control-panel, .nav-tabs, .btn-clear-sig { display: none !important; }
+            body { background: white; padding: 0; }
+            .official-paper { border: 2px solid #000; box-shadow: none; margin: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- شريط التحكم واختيار الموظف والواتساب -->
+    <div class="control-panel">
+        <h2>إدارة المساءلات والتواصل المباشر (واتساب المدرسة)</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>اختر المعلم / الموظف:</label>
+                <select id="staffSelect" onchange="autoFillStaffData()">
+                    <option value="">-- اختر اسم المعلم / الموظف --</option>
+                    <option value="1011223344" data-job="معلم" data-phone="966500000000" data-spec="لغة عربية" data-rank="المستوى 5 / الدرجة 3" data-jobnum="10023">مريزيق جطيل الرويلي</option>
+                    <option value="1022334455" data-job="معلم" data-phone="966500000001" data-spec="رياضيات" data-rank="المستوى 5 / الدرجة 4" data-jobnum="10024">خالد فرحان الرويلي</option>
+                    <option value="1033445566" data-job="معلم" data-phone="966500000002" data-spec="علوم" data-rank="المستوى 5 / الدرجة 2" data-jobnum="10025">خالد مناحي الرويلي</option>
+                    <option value="1044556677" data-job="معلم" data-phone="966500000003" data-spec="تربية إسلامية" data-rank="المستوى 5 / الدرجة 5" data-jobnum="10026">راضي هليل الرويلي</option>
+                    <option value="1055667788" data-job="مساعد إداري" data-phone="966500000004" data-spec="إدارة" data-rank="المرتبة 6 / الدرجة 4" data-jobnum="10099">خالد شاقي الرويلي</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>السجل المدني (تلقائي):</label>
+                <input type="text" id="nationalId" readonly placeholder="سيظهر تلقائياً">
+            </div>
+            <div class="form-group">
+                <label>رقم جوال الواتساب:</label>
+                <input type="text" id="phoneNum" placeholder="مثال: 96650XXXXXXXX">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-whatsapp" onclick="sendViaWhatsApp()">
+                📱 إرسال رابط المساءلة المباشر عبر واتساب للمعلم
+            </button>
+            <button class="btn-whatsapp" style="background-color: #1F2937;" onclick="window.print()">
+                🖨️ طباعة النموذج المعتمد
+            </button>
+        </div>
+    </div>
+
+    <!-- التبويب بين النموذجين -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchModel('model1')">1. نموذج مساءلة غياب (و.م.ع.ن - 1)</button>
+        <button class="tab-btn" onclick="switchModel('model2')">2. نموذج (5) تنبيه (تأخر/انصراف/غياب)</button>
+    </div>
+
+    <!-- ==================== النموذج الأول: مساءلة غياب ==================== -->
+    <div id="model1" class="model-section active">
+        <div class="official-paper">
+            <div class="header-official">
+                <div class="side">
+                    المملكة العربية السعودية<br>
+                    وزارة التعليم (280)<br>
+                    الإدارة العامة للتعليم بمنطقة الجوف<br>
+                    مدرسة عبدالله بن مسعود الابتدائية
+                </div>
+                <div class="center">
+                    <h3 style="font-size: 1.1rem; font-weight: 900;">بسم الله الرحمن الرحيم</h3>
+                    <p style="font-size: 0.8rem;">Ministry of Education</p>
+                </div>
+                <div class="left">
+                    الرقم: ........................<br>
+                    التاريخ: / / 1448 هـ<br>
+                    المرفقات: ....................
+                </div>
+            </div>
+
+            <div class="doc-title">اسم النموذج : مساءلة غياب</div>
+            <div class="doc-code">رمز النموذج : ( و.م.ع.ن - 1 )</div>
+
+            <!-- جدول بيانات الموظف المعتمد -->
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>التخصص</th>
+                        <th>المستوى / المرتبة</th>
+                        <th>الدرجة</th>
+                        <th>رقم الوظيفة</th>
+                        <th>العمل الحالي</th>
+                        <th>عدد أيام الغياب</th>
+                        <th>السجل المدني</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="m1_name">-</td>
+                        <td id="m1_spec">-</td>
+                        <td id="m1_rank">-</td>
+                        <td id="m1_grade">-</td>
+                        <td id="m1_jobnum">-</td>
+                        <td id="m1_job">-</td>
+                        <td><input type="number" style="width: 50px; text-align: center;" value="1"></td>
+                        <td id="m1_id" style="font-weight: 700;">-</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="margin: 10px 0; font-size: 0.9rem;">
+                إنه في يوم : <input type="text" style="width: 100px;"> الموافق: / / 1448 هـ 
+                تغيبت عن العمل إلى يوم : <input type="text" style="width: 100px;"> الموافق: / / 1448 هـ
+            </p>
+
+            <!-- البند (1): طلب الإفادة -->
+            <div class="section-box">
+                <div class="section-header">( 1 ) طلب الإفادة :</div>
+                <p>المكرم / <strong id="m1_target_name">..................................................</strong> وفقه الله</p>
+                <p>السلام عليكم ورحمة الله وبركاته .. وبعد :</p>
+                <p>من خلال متابعة الدوام تبين غيابكم ، آمل الإفادة عن أسباب ذلك وعليكم تقديم ما يؤيد عذركم خلال أسبوع من تاريخه ، علماً بأنه في حالة عدم الالتزام سيتم اتخاذ اللازم حسب التعليمات .</p>
+                <br>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>اسم الرئيس المباشر : <strong>عويد عشبان الرويلي</strong></span>
+                    <span>التوقيع : ...................................</span>
+                </div>
+            </div>
+
+            <!-- البند (2): الإفادة -->
+            <div class="section-box">
+                <div class="section-header">( 2 ) الإفادة :</div>
+                <p>المكرم مدير مدرسة عبدالله بن مسعود الابتدائية وفقه الله</p>
+                <p>السلام عليكم ورحمة الله وبركاته .. وبعد :</p>
+                <p>أفيدكم أن غيابي كان للأسباب التالية :</p>
+                <textarea rows="3" style="width: 100%; margin: 8px 0; padding: 5px;" placeholder="يكتب المعلم أسباب الغياب هنا..."></textarea>
+                <p>وسأقوم بتقديم ما يثبت ذلك خلال أسبوع من تاريخه .</p>
+                <br>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        الاسم : <strong id="m1_reply_name">..................................................</strong><br>
+                        التاريخ: / / 1448 هـ
+                    </div>
+                    <div style="width: 250px;">
+                        <span>توقيع المعلم/الموظف (ارسم التوقيع):</span>
+                        <div class="sig-container"><canvas id="sig1"></canvas></div>
+                        <button class="btn-clear-sig" onclick="clearSig('sig1')">مسح التوقيع</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- البند (3): مدير المدرسة -->
+            <div class="section-box">
+                <div class="section-header">( 3 ) مدير المدرسة :</div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="radio" name="m1_decision"> تحتسب له إجازة مرضية بعد التأكد من نظامية التقرير .</label>
+                    <label class="checkbox-item"><input type="radio" name="m1_decision"> يحتسب غيابه من رصيده للإجازات الاضطرارية لقبول عذره إذا كان رصيده يسمح وإلا يحسم عليه .</label>
+                    <label class="checkbox-item"><input type="radio" name="m1_decision"> يعتمد الحسم لعدم قبول عذره .</label>
+                </div>
+                <br>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>اسم الرئيس المباشر : <strong>عويد عشبان الرويلي</strong></span>
+                    <span>التوقيع : ..................................</span>
+                    <span>التاريخ : / / 1448 هـ</span>
+                </div>
+            </div>
+
+            <!-- ملاحظات هامة والحاشية السفلى -->
+            <div class="footer-notes">
+                <strong>ملاحظات هامة :</strong><br>
+                1 - تستكمل الاستمارة من المدير المباشر وإصدار القرار بموجبه .<br>
+                2 - إذا سبق عطلة نهاية الأسبوع غياب وألحقها غياب تحتسب مدة الغياب كاملة .<br>
+                3 - يجب أن يوضح المتغيب أسباب غيابه فور تسلمه الاستمارة ويعيدها للمدير المباشر .<br>
+                4 - يعطى المتغيب مدة أسبوع لتقديم ما يؤيد عذره فإذا انقضت المدة الزمنية تستكمل الاستمارة ويتم الحسم .
+                <br><br>
+                <div style="text-align: center; font-weight: 700;">
+                    الجوف - صوير - العنوان الوطني WUDA4082 - البريد الإلكتروني jb.moe.gov.sa@84146
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== النموذج الثاني: نموذج (5) تنبيه معلم ==================== -->
+    <div id="model2" class="model-section">
+        <div class="official-paper">
+            <div class="header-official">
+                <div class="side">
+                    المملكة العربية السعودية<br>
+                    وزارة التعليم<br>
+                    إدارة التعليم بمنطقة الجوف<br>
+                    مدرسة عبدالله بن مسعود الابتدائية
+                </div>
+                <div class="center">
+                    <h3 style="font-size: 1.1rem; font-weight: 900;">وزارة التعليم</h3>
+                    <p style="font-size: 0.8rem;">Ministry of Education</p>
+                </div>
+                <div class="left">
+                    الرقم: ........................<br>
+                    التاريخ: / / 1448 هـ
+                </div>
+            </div>
+
+            <div class="doc-title">نموذج ( 5 )</div>
+            <div class="doc-code" style="font-size: 1rem;">☐ ☐ ☐ (( تنبيه معلم عن : تأخر / انصراف / غياب ))</div>
+
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>التخصص</th>
+                        <th>المستوى / الدرجة</th>
+                        <th>رقم الوظيفة</th>
+                        <th>العمل الحالي</th>
+                        <th>رقم سجل</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="m2_name">-</td>
+                        <td id="m2_spec">-</td>
+                        <td id="m2_rank">-</td>
+                        <td id="m2_jobnum">-</td>
+                        <td>معلم</td>
+                        <td id="m2_id" style="font-weight: 700;">-</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-box">
+                <p>المكرم المعلم / <strong id="m2_target_name">..................................................</strong> وفقه الله</p>
+                <p>السلام عليكم ورحمة الله وبركاته .. وبعد :</p>
+                <p>أنه في يوم ( <input type="text" style="width: 80px;"> ) الموافق : / / 1448 هـ اتضح ما يلي :</p>
+                
+                <div class="checkbox-group" style="margin-top: 10px;">
+                    <label class="checkbox-item"><input type="checkbox"> تأخركم من بداية الدوام ، وحضوركم الساعة ( <input type="text" style="width: 60px;"> )</label>
+                    <label class="checkbox-item"><input type="checkbox"> عدم تواجدكم أثناء الدوام من الساعة ( <input type="text" style="width: 50px;"> ) إلى الساعة ( <input type="text" style="width: 50px;"> )</label>
+                    <label class="checkbox-item"><input type="checkbox"> انصرافكم مبكراً قبل نهاية الدوام من الساعة ( <input type="text" style="width: 60px;"> )</label>
+                    <label class="checkbox-item"><input type="checkbox"> غياب عن الدوام يوم ( <input type="text" style="width: 80px;"> ) الموافق: / / 1448 هـ</label>
+                    <label class="checkbox-item"><input type="checkbox"> عدم التحضير في منصة مدرستي يوم ( <input type="text" style="width: 80px;"> )</label>
+                </div>
+
+                <p style="margin-top: 10px;">عليه نأمل توضيح أسباب ذلك مع إرفاق ما يؤيد عذركم ،،، ولكم تحياتي ،،،</p>
+                <br>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>مدير المدرسة : <strong>عويد عشبان الرويلي</strong></span>
+                    <span>التوقيع : .........................</span>
+                    <span>التاريخ : / / 1448 هـ</span>
+                </div>
+            </div>
+
+            <!-- إفادة المعلم -->
+            <div class="section-box">
+                <p>المكرم / مدير مدرسة عبدالله بن مسعود الابتدائية وفقه الله</p>
+                <p>السلام عليكم ورحمة الله وبركاته .. وبعد : أفيدكم أن أسباب ذلك ما يلي :</p>
+                <textarea rows="3" style="width: 100%; margin: 8px 0; padding: 5px;" placeholder="توضيح أسباب التأخر أو الانصراف أو الغياب..."></textarea>
+                <br>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        الاسم : <strong id="m2_reply_name">..................................................</strong><br>
+                        التاريخ: / / 1448 هـ
+                    </div>
+                    <div style="width: 250px;">
+                        <span>التوقيع (توقيع المعلم):</span>
+                        <div class="sig-container"><canvas id="sig2"></canvas></div>
+                        <button class="btn-clear-sig" onclick="clearSig('sig2')">مسح التوقيع</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- رأي مدير المدرسة -->
+            <div class="section-box">
+                <strong>رأي مدير المدرسة :</strong>
+                <div class="checkbox-group" style="margin-top: 5px;">
+                    <label class="checkbox-item"><input type="radio" name="m2_opinion"> عذره مقبول .</label>
+                    <label class="checkbox-item"><input type="radio" name="m2_opinion"> عذره غير مقبول ويحسم عليه .</label>
+                </div>
+                <br>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>مدير المدرسة : <strong>عويد عشبان الرويلي</strong></span>
+                    <span>التوقيع : .........................</span>
+                    <span>التاريخ : / / 1448 هـ</span>
+                </div>
+            </div>
+
+            <p style="font-size: 0.8rem; font-weight: 700; margin-top: 10px;">
+                ملاحظة : ترفق بطاقة المساءلة مع أصل القرار في حالة عدم قبول العذر لحفظها بملفه في الإدارة .
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // بيانات موظفي المدرسة والربط التلقائي
+    function autoFillStaffData() {
+        const select = document.getElementById('staffSelect');
+        const selectedOpt = select.options[select.selectedIndex];
+        
+        if (!select.value) {
+            clearFields();
+            return;
+        }
+
+        const id = select.value;
+        const name = selectedOpt.text;
+        const job = selectedOpt.getAttribute('data-job');
+        const phone = selectedOpt.getAttribute('data-phone');
+        const spec = selectedOpt.getAttribute('data-spec');
+        const rank = selectedOpt.getAttribute('data-rank');
+        const jobnum = selectedOpt.getAttribute('data-jobnum');
+
+        document.getElementById('nationalId').value = id;
+        document.getElementById('phoneNum').value = phone;
+
+        // تعبئة النموذج الأول
+        document.getElementById('m1_name').innerText = name;
+        document.getElementById('m1_id').innerText = id;
+        document.getElementById('m1_job').innerText = job;
+        document.getElementById('m1_spec').innerText = spec;
+        document.getElementById('m1_rank').innerText = rank;
+        document.getElementById('m1_grade').innerText = 'الدرجة 3';
+        document.getElementById('m1_jobnum').innerText = jobnum;
+        document.getElementById('m1_target_name').innerText = name;
+        document.getElementById('m1_reply_name').innerText = name;
+
+        // تعبئة النموذج الثاني
+        document.getElementById('m2_name').innerText = name;
+        document.getElementById('m2_id').innerText = id;
+        document.getElementById('m2_spec').innerText = spec;
+        document.getElementById('m2_rank').innerText = rank;
+        document.getElementById('m2_jobnum').innerText = jobnum;
+        document.getElementById('m2_target_name').innerText = name;
+        document.getElementById('m2_reply_name').innerText = name;
+    }
+
+    function clearFields() {
+        document.getElementById('nationalId').value = '';
+        document.getElementById('phoneNum').value = '';
+    }
+
+    // إرسال عبر الواتساب المباشر
+    function sendViaWhatsApp() {
+        const phone = document.getElementById('phoneNum').value;
+        const select = document.getElementById('staffSelect');
+        const name = select.options[select.selectedIndex].text;
+
+        if (!phone || !select.value) {
+            alert('يرجى اختيار المعلم/الموظف للتأكد من وجود رقم الجوال السجل!');
+            return;
+        }
+
+        const pageUrl = window.location.href;
+        const msg = `المكرم المعلم/الموظف: ${name} المحترم،%0Aالسلام عليكم ورحمة الله وبركاته..%0Aنأمل الاطلاع وتعبئة النموذج الإلكتروني المعتمد للمساءلة عبر الرابط التالي:%0A${pageUrl}`;
+        
+        window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
+    }
+
+    // التنقل بين النموذجين المعتمدين
+    function switchModel(modelId) {
+        document.querySelectorAll('.model-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(modelId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // إعداد التوقيع الإلكتروني
+    function initSig(id) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        canvas.width = canvas.parentElement.offsetWidth;
+        canvas.height = canvas.parentElement.offsetHeight;
+
+        function start(e) { drawing = true; draw(e); }
+        function end() { drawing = false; ctx.beginPath(); }
+        function draw(e) {
+            if (!drawing) return;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+
+            const rect = canvas.getBoundingClientRect();
+            let x = (e.clientX || e.touches[0].clientX) - rect.left;
+            let y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mouseup', end);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', start);
+        canvas.addEventListener('touchend', end);
+        canvas.addEventListener('touchmove', draw);
+    }
+
+    function clearSig(id) {
+        const canvas = document.getElementById(id);
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    window.onload = function() {
+        initSig('sig1');
+        initSig('sig2');
+    };
+</script>
+
+</body>
+</html>
