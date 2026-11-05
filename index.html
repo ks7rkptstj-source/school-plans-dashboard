@@ -16,8 +16,8 @@
             margin: 0;
             padding: 0;
             font-family: 'Traditional Arabic', 'Amiri', 'Segoe UI', serif;
-            font-size: 11pt; /* تصغير الخط */
-            line-height: 1.15; /* تقريب السطور والمسافات */
+            font-size: 11pt;
+            line-height: 1.15;
         }
 
         body {
@@ -160,10 +160,11 @@
             border-bottom: 1px solid #000;
         }
 
+        /* إطار التوقيع باللمس */
         .sig-wrapper {
             border: 1px dashed #000;
-            width: 130px;
-            height: 38px;
+            width: 140px;
+            height: 42px;
             background: #fff;
             position: relative;
         }
@@ -184,15 +185,6 @@
             border-radius: 2px;
             cursor: pointer;
             margin-top: 1px;
-        }
-
-        .manager-sig-box {
-            text-align: center;
-            border: 1px solid #065F46;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: #F0FDF4;
-            display: inline-block;
         }
 
         .footer-note {
@@ -279,6 +271,7 @@
     <div class="form-row">
         <button class="btn" onclick="sendWhatsApp()">📱 إرسال رابط النموذج عبر الواتساب للمعلم</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة النموذج (صفحة واحدة)</button>
+        <button class="btn" style="background-color: #0284C7;" onclick="saveAndSend()">💾 حفظ وإعادة الإرسال للمدير</button>
     </div>
 </div>
 
@@ -298,9 +291,9 @@
                     <span style="font-size: 7.5pt;">Ministry of Education</span>
                 </td>
                 <td style="width: 35%; text-align: left; font-size: 9.5pt;">
-                    الرقم: ........................<br>
-                    التاريخ: <span class="auto-date"></span><br>
-                    المرفقات: ....................
+                    الرقم: <input type="text" style="width: 80px; display:inline-block;" placeholder="تصدير">ج<br>
+                    التاريخ: <input type="text" id="m1_header_date" style="width: 90px; display:inline-block;" placeholder="1448/05/20"> هـ<br>
+                    المرفقات: <input type="text" style="width: 80px; display:inline-block;" value="0">
                 </td>
             </tr>
         </table>
@@ -349,8 +342,8 @@
         </table>
 
         <p style="margin: 3px 0; font-size: 10.5pt;">
-            إنه في يوم : <input type="text" style="width: 70px;"> الموافق: <span class="auto-date"></span> 
-            تغيبت عن العمل إلى يوم : <input type="text" style="width: 70px;"> الموافق: <span class="auto-date"></span>
+            إنه في يوم : <input type="text" placeholder="أدخل اليوم" style="width: 70px; display:inline-block;"> الموافق: <input type="text" placeholder="1448/05/20" style="width: 90px; display:inline-block;"> 
+            تغيبت عن العمل إلى يوم : <input type="text" placeholder="أدخل اليوم" style="width: 70px; display:inline-block;"> الموافق: <input type="text" placeholder="1448/05/20" style="width: 90px; display:inline-block;">
         </p>
 
         <!-- ( 1 ) طلب الإفادة -->
@@ -360,28 +353,29 @@
             <p>السلام عليكم ورحمة الله وبركاته .. وبعد : من خلال متابعة الدوام تبين غيابكم ، آمل الإفادة عن أسباب ذلك وعليكم تقديم ما يؤيد عذركم خلال أسبوع من تاريخه .</p>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <span>اسم الرئيس المباشر : <strong>عويد عشبان الرويلي</strong></span>
-                <div class="manager-sig-box">
-                    <span style="font-size: 8pt; display: block;">توقيع المدير الإلكتروني</span>
-                    <strong style="font-family: 'Amiri'; font-size: 12pt; color: #065F46;">عويد الرويلي</strong>
+                <div>
+                    <span style="font-size: 8pt; display: block; text-align: center;">توقيع الرئيس المباشر</span>
+                    <div class="sig-wrapper"><canvas id="sigManager1"></canvas></div>
+                    <button class="clear-btn" onclick="clearSig('sigManager1')">مسح</button>
                 </div>
             </div>
         </div>
 
         <!-- ( 2 ) الإفادة -->
-        <div class="section-box">
-            <div class="section-title">( 2 ) الإفادة :</div>
+        <div class="section-box" style="background: #FFFDF4;">
+            <div class="section-title" style="background: #FEF3C7;">( 2 ) الإفادة (خاص بالمعلم/الموظف - متاح للتعبئة) :</div>
             <p>المكرم مدير مدرسة عبدالله بن مسعود الابتدائية وفقه الله .. أفيدكم أن غيابي كان للأسباب التالية :</p>
-            <textarea rows="2" style="margin: 2px 0;" placeholder="يكتب المعلم أسباب غيابه هنا..."></textarea>
+            <textarea id="m1_excuse" rows="2" style="margin: 2px 0;" placeholder="اكتب أسباب الغذر هنا..."></textarea>
             
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 2px;">
                 <div>
                     الاسم : <strong class="target-staff-name">..................................................</strong><br>
-                    التاريخ: <span class="auto-date"></span>
+                    التاريخ: <input type="text" placeholder="1448/05/20" style="width: 90px; display:inline-block; margin-top:2px;">
                 </div>
                 <div>
                     <span style="font-size: 8.5pt;">توقيع المعلم (رسم باللمس):</span>
-                    <div class="sig-wrapper"><canvas id="sigCanvas1"></canvas></div>
-                    <button class="clear-btn" onclick="clearSig('sigCanvas1')">مسح التوقيع</button>
+                    <div class="sig-wrapper"><canvas id="sigStaff1"></canvas></div>
+                    <button class="clear-btn" onclick="clearSig('sigStaff1')">مسح التوقيع</button>
                 </div>
             </div>
         </div>
@@ -389,17 +383,27 @@
         <!-- ( 3 ) مدير المدرسة -->
         <div class="section-box">
             <div class="section-title">( 3 ) مدير المدرسة :</div>
-            <div style="display: flex; flex-direction: column; gap: 1px; font-size: 10pt;">
-                <label><input type="radio" name="m1_dec"> ✔ تحتسب له إجازة مرضية بعد التأكد من نظامية التقرير .</label>
-                <label><input type="radio" name="m1_dec"> ✔ يحتسب غيابه من رصيده للإجازات الاضطرارية لقبول عذره إذا كان رصيده يسمح .</label>
-                <label><input type="radio" name="m1_dec"> ✔ يعتمد الحسم لعدم قبول عذره .</label>
+            <div style="display: flex; flex-direction: column; gap: 2px; font-size: 10pt;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <select style="width: 50px; text-align: center;"><option></option><option>✔</option></select>
+                    <span>تحتسب له إجازة مرضية بعد التأكد من نظامية التقرير .</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <select style="width: 50px; text-align: center;"><option></option><option>✔</option></select>
+                    <span>يحتسب غيابه من رصيده للإجازات الاضطرارية لقبول عذره إذا كان رصيده يسمح .</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <select style="width: 50px; text-align: center;"><option></option><option>✔</option></select>
+                    <span>يعتمد الحسم لعدم قبول عذره .</span>
+                </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <span>اسم الرئيس المباشر : <strong>عويد عشبان الرويلي</strong></span>
-                <span>التاريخ : <span class="auto-date"></span></span>
-                <div class="manager-sig-box" style="padding: 1px 6px;">
-                    <span style="font-size: 7.5pt; display: block;">توقيع المدير</span>
-                    <strong style="font-family: 'Amiri'; font-size: 11pt; color: #065F46;">عويد الرويلي</strong>
+                <span>التاريخ : <input type="text" style="width: 85px; display:inline-block;" placeholder="1448/05/20"></span>
+                <div>
+                    <span style="font-size: 8pt; display: block; text-align: center;">توقيع مدير المدرسة</span>
+                    <div class="sig-wrapper"><canvas id="sigDirector1"></canvas></div>
+                    <button class="clear-btn" onclick="clearSig('sigDirector1')">مسح</button>
                 </div>
             </div>
         </div>
@@ -430,8 +434,8 @@
                     <span style="font-size: 7.5pt;">Ministry of Education</span>
                 </td>
                 <td style="width: 35%; text-align: left; font-size: 9.5pt;">
-                    الرقم: ........................<br>
-                    التاريخ: <span class="auto-date"></span>
+                    الرقم: <input type="text" style="width: 80px; display:inline-block;"><br>
+                    التاريخ: <input type="text" style="width: 90px; display:inline-block;" placeholder="1448/05/20"> هـ
                 </td>
             </tr>
         </table>
@@ -477,55 +481,73 @@
 
         <div class="section-box">
             <p>المكرم المعلم / <strong class="target-staff-name">..................................................</strong> وفقه الله</p>
-            <p>السلام عليكم ورحمة الله .. انه في يوم ( <input type="text" style="width: 50px;"> ) الموافق : <span class="auto-date"></span> اتضح ما يلي :</p>
+            <p>السلام عليكم ورحمة الله .. انه في يوم ( <input type="text" placeholder="اليوم" style="width: 50px; display:inline-block;"> ) الموافق : <input type="text" placeholder="1448/05/20" style="width: 90px; display:inline-block;"> اتضح ما يلي :</p>
             
-            <div style="display: flex; flex-direction: column; gap: 1px; margin: 2px 0; font-size: 10pt;">
-                <label><input type="checkbox"> ✔ تأخركم من بداية الدوام ، وحضوركم الساعة ( <input type="text" style="width: 40px;"> )</label>
-                <label><input type="checkbox"> ✔ عدم تواجدكم أثناء الدوام من الساعة ( <input type="text" style="width: 35px;"> ) إلى ( <input type="text" style="width: 35px;"> )</label>
-                <label><input type="checkbox"> ✔ انصرافكم مبكراً قبل نهاية الدوام من الساعة ( <input type="text" style="width: 40px;"> )</label>
-                <label><input type="checkbox"> ✔ غياب عن الدوام يوم ( <input type="text" style="width: 50px;"> ) الموافق: <span class="auto-date"></span></label>
-                <label><input type="checkbox"> ✔ عدم التحضير في منصة مدرستي يوم ( <input type="text" style="width: 50px;"> )</label>
+            <div style="display: flex; flex-direction: column; gap: 2px; margin: 2px 0; font-size: 10pt;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <select style="width: 50px; text-align: center;"><option></option><option>✔</option></select>
+                    <span>تأخركم من بداية الدوام ، وحضوركم الساعة ( <input type="text" style="width: 40px; display:inline-block;"> )</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <select style="width: 50px; text-align: center;"><option></option><option>✔</option></select>
+                    <span>عدم تواجدكم أثناء الدوام من الساعة ( <input type="text" style="width: 35px; display:inline-block;"> ) إلى ( <input type="text" style="width: 35px; display:inline-block;"> )</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <select style="width: 50px; text-align: center;"><option></option><option>✔</option></select>
+                    <span>انصرافكم مبكراً قبل نهاية الدوام من الساعة ( <input type="text" style="width: 40px; display:inline-block;"> )</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <select style="width: 50px; text-align: center;"><option></option><option>✔</option></select>
+                    <span>غياب عن الدوام يوم ( <input type="text" style="width: 50px; display:inline-block;"> ) الموافق: <input type="text" placeholder="1448/05/20" style="width: 90px; display:inline-block;"></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <select style="width: 50px; text-align: center;"><option></option><option>✔</option></select>
+                    <span>عدم التحضير في منصة مدرستي يوم ( <input type="text" style="width: 50px; display:inline-block;"> )</span>
+                </div>
             </div>
 
             <p>عليه نأمل توضيح أسباب ذلك مع إرفاق ما يؤيد عذركم ،،،</p>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <span>مدير المدرسة : <strong>عويد عشبان الرويلي</strong></span>
-                <div class="manager-sig-box" style="padding: 1px 6px;">
-                    <span style="font-size: 7.5pt; display: block;">توقيع المدير</span>
-                    <strong style="font-family: 'Amiri'; font-size: 11pt; color: #065F46;">عويد الرويلي</strong>
+                <div>
+                    <span style="font-size: 8pt; display: block; text-align: center;">توقيع مدير المدرسة</span>
+                    <div class="sig-wrapper"><canvas id="sigDirector2"></canvas></div>
+                    <button class="clear-btn" onclick="clearSig('sigDirector2')">مسح</button>
                 </div>
             </div>
         </div>
 
-        <div class="section-box">
+        <div class="section-box" style="background: #FFFDF4;">
+            <div class="section-title" style="background: #FEF3C7;">إفادة المعلم (خاص بالمعلم/الموظف - متاح للتعبئة) :</div>
             <p>المكرم / مدير مدرسة عبدالله بن مسعود الابتدائية .. أفيدكم أن أسباب ذلك ما يلي :</p>
-            <textarea rows="2" style="margin: 2px 0;" placeholder="أسباب التأخر أو الانصراف أو الغياب..."></textarea>
+            <textarea id="m2_excuse" rows="2" style="margin: 2px 0;" placeholder="أسباب التأخر أو الانصراف أو الغياب..."></textarea>
             
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 2px;">
                 <div>
                     الاسم : <strong class="target-staff-name">..................................................</strong><br>
-                    التاريخ: <span class="auto-date"></span>
+                    التاريخ: <input type="text" placeholder="1448/05/20" style="width: 90px; display:inline-block; margin-top:2px;">
                 </div>
                 <div>
                     <span style="font-size: 8.5pt;">توقيع المعلم:</span>
-                    <div class="sig-wrapper"><canvas id="sigCanvas2"></canvas></div>
-                    <button class="clear-btn" onclick="clearSig('sigCanvas2')">مسح التوقيع</button>
+                    <div class="sig-wrapper"><canvas id="sigStaff2"></canvas></div>
+                    <button class="clear-btn" onclick="clearSig('sigStaff2')">مسح التوقيع</button>
                 </div>
             </div>
         </div>
 
         <div class="section-box">
             <strong>رأي مدير المدرسة :</strong>
-            <div style="display: flex; gap: 15px; margin: 2px 0; font-size: 10pt;">
-                <label><input type="radio" name="m2_op"> ✔ عذره مقبول .</label>
-                <label><input type="radio" name="m2_op"> ✔ عذره غير مقبول ويحسم عليه .</label>
+            <div style="display: flex; gap: 15px; margin: 2px 0; font-size: 10pt; align-items: center;">
+                <label style="display:flex; align-items:center; gap:4px;"><select style="width: 45px; text-align: center;"><option></option><option>✔</option></select> عذره مقبول .</label>
+                <label style="display:flex; align-items:center; gap:4px;"><select style="width: 45px; text-align: center;"><option></option><option>✔</option></select> عذره غير مقبول ويحسم عليه .</label>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <span>مدير المدرسة : <strong>عويد عشبان الرويلي</strong></span>
-                <span>التاريخ : <span class="auto-date"></span></span>
-                <div class="manager-sig-box" style="padding: 1px 6px;">
-                    <span style="font-size: 7.5pt; display: block;">توقيع المدير</span>
-                    <strong style="font-family: 'Amiri'; font-size: 11pt; color: #065F46;">عويد الرويلي</strong>
+                <span>التاريخ : <input type="text" style="width: 85px; display:inline-block;" placeholder="1448/05/20"></span>
+                <div>
+                    <span style="font-size: 8pt; display: block; text-align: center;">توقيع المدير</span>
+                    <div class="sig-wrapper"><canvas id="sigDirector3"></canvas></div>
+                    <button class="clear-btn" onclick="clearSig('sigDirector3')">مسح</button>
                 </div>
             </div>
         </div>
@@ -600,17 +622,13 @@
         m1Sel.innerHTML = options;
         m2Sel.innerHTML = options;
 
-        // توليد التاريخ بالأرقام الذكية (يوم/شهر رقمي/سنة)
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const yyyy = today.getFullYear();
-        const numericDate = `${dd}/${mm}/${yyyy}`;
-        
-        document.querySelectorAll('.auto-date').forEach(el => el.innerText = numericDate);
-
-        setupCanvas('sigCanvas1');
-        setupCanvas('sigCanvas2');
+        // تهيئة لوحات التوقيع الإلكتروني الأربعة
+        setupCanvas('sigManager1');
+        setupCanvas('sigStaff1');
+        setupCanvas('sigDirector1');
+        setupCanvas('sigDirector2');
+        setupCanvas('sigStaff2');
+        setupCanvas('sigDirector3');
     };
 
     function onStaffChange() {
@@ -661,6 +679,10 @@
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
     }
 
+    function saveAndSend() {
+        alert('تم حفظ الإفادة والتوقيع بنجاح، وجاهزة للإرسال إلى لوحة تحكم المدير!');
+    }
+
     function switchModel(m) {
         document.querySelectorAll('.model-container').forEach(e => e.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
@@ -670,6 +692,7 @@
 
     function setupCanvas(id) {
         const cvs = document.getElementById(id);
+        if(!cvs) return;
         const ctx = cvs.getContext('2d');
         let drawing = false;
 
