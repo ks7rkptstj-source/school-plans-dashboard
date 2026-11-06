@@ -160,7 +160,7 @@
             border-bottom: 1px solid #000;
         }
 
-        /* حاوية التوقيع المطابقة لنمط التطبيقات */
+        /* حاوية التوقيع */
         .sig-box-container {
             border: 1px dashed #065F46;
             width: 150px;
@@ -208,7 +208,7 @@
             margin-top: 1px;
         }
 
-        /* تصميم نافذة إضافة توقيع المنبثقة (Modal) */
+        /* نافذة إضافة وإدارة التواقيع (Modal) */
         .sig-modal-overlay {
             position: fixed;
             top: 0;
@@ -257,7 +257,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             margin-bottom: 12px;
-            max-height: 140px;
+            max-height: 150px;
             overflow-y: auto;
         }
 
@@ -266,19 +266,31 @@
             border-radius: 4px;
             padding: 5px;
             text-align: center;
-            cursor: pointer;
             background: #f9f9f9;
+            position: relative;
             transition: 0.2s;
-        }
-
-        .saved-sig-card:hover {
-            border-color: #065F46;
-            background: #f0fdf4;
         }
 
         .saved-sig-card img {
             max-height: 35px;
             max-width: 100%;
+            cursor: pointer;
+        }
+
+        .delete-sig-btn {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 9pt;
+            line-height: 16px;
+            cursor: pointer;
+            text-align: center;
         }
 
         .sig-tabs-panel {
@@ -414,13 +426,13 @@
 <div id="sigModal" class="sig-modal-overlay">
     <div class="sig-modal-content">
         <div class="sig-modal-header">
-            <span>✍️ إضافة توقيع (من تواقيعي)</span>
+            <span>✍️ إدارة وتواقيعي المحفوظة</span>
             <button class="sig-modal-close" onclick="closeSigModal()">&times;</button>
         </div>
 
-        <!-- قسم التواقيع المحفوظة مسبقاً -->
+        <!-- قسم التواقيع المحفوظة مع زر حذف لكل توقيع -->
         <div style="margin-bottom: 10px;">
-            <span style="font-size: 9pt; font-weight: bold; color: #333; display: block; margin-bottom: 4px;">التواقيع المحفوظة في جهازك:</span>
+            <span style="font-size: 9pt; font-weight: bold; color: #333; display: block; margin-bottom: 4px;">التواقيع المحفوظة (انقر للاستخدام أو ❌ للحذف):</span>
             <div id="savedSigsList" class="saved-sigs-grid">
                 <span style="font-size: 8.5pt; color: #777; grid-column: span 2; text-align: center; padding: 10px;">لا توجد تواقيع محفوظة بعد</span>
             </div>
@@ -893,7 +905,7 @@
         event.currentTarget.classList.add('active');
     }
 
-    /* دوام نافذة التواقيع المنبثقة (Modal) */
+    /* إدارة النافذة المنبثقة للتواقيع */
     function openSigModal(targetId) {
         currentTargetSigId = targetId;
         document.getElementById('sigModal').style.display = 'flex';
@@ -913,7 +925,6 @@
         evt.currentTarget.classList.add('active');
     }
 
-    /* رسم داخل النافذة */
     function getModalPos(e) {
         const cvs = document.getElementById('modalCanvas');
         const rect = cvs.getBoundingClientRect();
@@ -948,7 +959,7 @@
         modalCanvasCtx.clearRect(0, 0, cvs.width, cvs.height);
     }
 
-    /* حفظ التوقيع في الـ localStorage ليكون ضمن "تواقيعي" */
+    /* إدارة التواقيع المحفوظة (حفظ، عرض، وحذف) */
     function getStoredSignatures() {
         try {
             return JSON.parse(localStorage.getItem('my_school_signatures') || '[]');
@@ -961,6 +972,14 @@
         localStorage.setItem('my_school_signatures', JSON.stringify(sigs));
     }
 
+    function deleteStoredSignature(index, event) {
+        event.stopPropagation(); // منع تطبيق التوقيع عند الضغط على زر الحذف
+        let sigs = getStoredSignatures();
+        sigs.splice(index, 1);
+        localStorage.setItem('my_school_signatures', JSON.stringify(sigs));
+        loadSavedSignaturesUI();
+    }
+
     function loadSavedSignaturesUI() {
         const listDiv = document.getElementById('savedSigsList');
         const sigs = getStoredSignatures();
@@ -971,8 +990,9 @@
         let html = '';
         sigs.forEach((sig, index) => {
             html += `<div class="saved-sig-card" onclick="applySavedSignature('${sig}')">
+                <button class="delete-sig-btn" onclick="deleteStoredSignature(${index}, event)" title="حذف التوقيع">×</button>
                 <img src="${sig}" alt="توقيع ${index+1}">
-                <div style="font-size: 7.5pt; color: #065F46; font-weight: bold; margin-top: 2px;">توقيع ${index+1} (انقر للاستخدام)</div>
+                <div style="font-size: 7pt; color: #065F46; font-weight: bold; margin-top: 1px;">توقيع ${index+1}</div>
             </div>`;
         });
         listDiv.innerHTML = html;
