@@ -174,6 +174,7 @@
             height: 100%;
             display: block;
             touch-action: none;
+            cursor: crosshair;
         }
 
         .clear-btn {
@@ -185,6 +186,27 @@
             border-radius: 2px;
             cursor: pointer;
             margin-top: 1px;
+        }
+
+        /* نافذة خيارات التوقيع (إضافة توقيع برسم أو رفع صورة) */
+        .sig-option-bar {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        .sig-file-input {
+            font-size: 8pt;
+            width: auto;
+            display: none;
+        }
+
+        .sig-preview-img {
+            max-width: 100%;
+            max-height: 42px;
+            display: none;
+            margin: 0 auto;
         }
 
         .footer-note {
@@ -238,6 +260,7 @@
             body { background: #fff; padding: 0; margin: 0; }
             .paper { border: none; box-shadow: none; width: 100%; padding: 0; margin: 0; }
             .clear-btn { display: none !important; }
+            .sig-option-bar { display: none !important; }
         }
     </style>
 </head>
@@ -291,7 +314,7 @@
                     <span style="font-size: 7.5pt;">Ministry of Education</span>
                 </td>
                 <td style="width: 35%; text-align: left; font-size: 9.5pt;">
-                    الرقم: <input type="text" style="width: 80px; display:inline-block;" placeholder="تصدير">ج<br>
+                    الرقم: <input type="text" style="width: 80px; display:inline-block;" placeholder="الصادر"><br>
                     التاريخ: <input type="text" id="m1_header_date" style="width: 90px; display:inline-block;" placeholder="1448/05/20"> هـ<br>
                     المرفقات: <input type="text" style="width: 80px; display:inline-block;" value="0">
                 </td>
@@ -355,7 +378,13 @@
                 <span>اسم الرئيس المباشر : <strong>عويد عشبان الرويلي</strong></span>
                 <div>
                     <span style="font-size: 8pt; display: block; text-align: center;">توقيع الرئيس المباشر</span>
-                    <div class="sig-wrapper"><canvas id="sigManager1"></canvas></div>
+                    <div class="sig-option-bar">
+                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigManager1')">📂 رفع</label>
+                    </div>
+                    <div class="sig-wrapper">
+                        <canvas id="sigManager1"></canvas>
+                        <img id="img_sigManager1" class="sig-preview-img" alt="توقيع">
+                    </div>
                     <button class="clear-btn" onclick="clearSig('sigManager1')">مسح</button>
                 </div>
             </div>
@@ -373,8 +402,14 @@
                     التاريخ: <input type="text" placeholder="1448/05/20" style="width: 90px; display:inline-block; margin-top:2px;">
                 </div>
                 <div>
-                    <span style="font-size: 8.5pt;">توقيع المعلم (رسم باللمس):</span>
-                    <div class="sig-wrapper"><canvas id="sigStaff1"></canvas></div>
+                    <span style="font-size: 8.5pt;">توقيع المعلم:</span>
+                    <div class="sig-option-bar">
+                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigStaff1')">📂 رفع</label>
+                    </div>
+                    <div class="sig-wrapper">
+                        <canvas id="sigStaff1"></canvas>
+                        <img id="img_sigStaff1" class="sig-preview-img" alt="توقيع">
+                    </div>
                     <button class="clear-btn" onclick="clearSig('sigStaff1')">مسح التوقيع</button>
                 </div>
             </div>
@@ -402,7 +437,13 @@
                 <span>التاريخ : <input type="text" style="width: 85px; display:inline-block;" placeholder="1448/05/20"></span>
                 <div>
                     <span style="font-size: 8pt; display: block; text-align: center;">توقيع مدير المدرسة</span>
-                    <div class="sig-wrapper"><canvas id="sigDirector1"></canvas></div>
+                    <div class="sig-option-bar">
+                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigDirector1')">📂 رفع</label>
+                    </div>
+                    <div class="sig-wrapper">
+                        <canvas id="sigDirector1"></canvas>
+                        <img id="img_sigDirector1" class="sig-preview-img" alt="توقيع">
+                    </div>
                     <button class="clear-btn" onclick="clearSig('sigDirector1')">مسح</button>
                 </div>
             </div>
@@ -511,7 +552,13 @@
                 <span>مدير المدرسة : <strong>عويد عشبان الرويلي</strong></span>
                 <div>
                     <span style="font-size: 8pt; display: block; text-align: center;">توقيع مدير المدرسة</span>
-                    <div class="sig-wrapper"><canvas id="sigDirector2"></canvas></div>
+                    <div class="sig-option-bar">
+                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigDirector2')">📂 رفع</label>
+                    </div>
+                    <div class="sig-wrapper">
+                        <canvas id="sigDirector2"></canvas>
+                        <img id="img_sigDirector2" class="sig-preview-img" alt="توقيع">
+                    </div>
                     <button class="clear-btn" onclick="clearSig('sigDirector2')">مسح</button>
                 </div>
             </div>
@@ -529,7 +576,13 @@
                 </div>
                 <div>
                     <span style="font-size: 8.5pt;">توقيع المعلم:</span>
-                    <div class="sig-wrapper"><canvas id="sigStaff2"></canvas></div>
+                    <div class="sig-option-bar">
+                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigStaff2')">📂 رفع</label>
+                    </div>
+                    <div class="sig-wrapper">
+                        <canvas id="sigStaff2"></canvas>
+                        <img id="img_sigStaff2" class="sig-preview-img" alt="توقيع">
+                    </div>
                     <button class="clear-btn" onclick="clearSig('sigStaff2')">مسح التوقيع</button>
                 </div>
             </div>
@@ -546,7 +599,13 @@
                 <span>التاريخ : <input type="text" style="width: 85px; display:inline-block;" placeholder="1448/05/20"></span>
                 <div>
                     <span style="font-size: 8pt; display: block; text-align: center;">توقيع المدير</span>
-                    <div class="sig-wrapper"><canvas id="sigDirector3"></canvas></div>
+                    <div class="sig-option-bar">
+                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigDirector3')">📂 رفع</label>
+                    </div>
+                    <div class="sig-wrapper">
+                        <canvas id="sigDirector3"></canvas>
+                        <img id="img_sigDirector3" class="sig-preview-img" alt="توقيع">
+                    </div>
                     <button class="clear-btn" onclick="clearSig('sigDirector3')">مسح</button>
                 </div>
             </div>
@@ -622,7 +681,7 @@
         m1Sel.innerHTML = options;
         m2Sel.innerHTML = options;
 
-        // تهيئة لوحات التوقيع الإلكتروني الأربعة
+        // تهيئة لوحات التوقيع الإلكتروني
         setupCanvas('sigManager1');
         setupCanvas('sigStaff1');
         setupCanvas('sigDirector1');
@@ -740,6 +799,33 @@
         const cvs = document.getElementById(id);
         const ctx = cvs.getContext('2d');
         ctx.clearRect(0, 0, cvs.width, cvs.height);
+        
+        // إخفاء صورة التوقيع المرفوعة إن وجدت
+        const img = document.getElementById('img_' + id);
+        if(img) {
+            img.src = '';
+            img.style.display = 'none';
+        }
+        if(cvs) {
+            cvs.style.display = 'block';
+        }
+    }
+
+    function handleSigImage(event, id) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('img_' + id);
+                const cvs = document.getElementById(id);
+                if(img && cvs) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    cvs.style.display = 'none'; // إخفاء الكانفاس وعرض الصورة المرفوعة
+                }
+            }
+            reader.readAsDataURL(file);
+        }
     }
 </script>
 
