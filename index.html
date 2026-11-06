@@ -160,53 +160,165 @@
             border-bottom: 1px solid #000;
         }
 
-        /* إطار التوقيع باللمس */
-        .sig-wrapper {
-            border: 1px dashed #000;
-            width: 140px;
-            height: 42px;
-            background: #fff;
+        /* حاوية التوقيع المطابقة لنمط التطبيقات */
+        .sig-box-container {
+            border: 1px dashed #065F46;
+            width: 150px;
+            height: 48px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
             position: relative;
+            border-radius: 4px;
+            transition: all 0.2s;
         }
 
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            touch-action: none;
-            cursor: crosshair;
+        .sig-box-container:hover {
+            background: #f0fdf4;
+            border-color: #047857;
+        }
+
+        .sig-placeholder-text {
+            font-size: 8.5pt;
+            color: #065F46;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .sig-rendered-img {
+            max-width: 100%;
+            max-height: 44px;
+            object-fit: contain;
+            display: none;
         }
 
         .clear-btn {
             background: #dc2626;
             color: #fff;
             border: none;
-            font-size: 7.5pt;
-            padding: 1px 3px;
+            font-size: 7pt;
+            padding: 1px 4px;
             border-radius: 2px;
             cursor: pointer;
             margin-top: 1px;
         }
 
-        /* نافذة خيارات التوقيع (إضافة توقيع برسم أو رفع صورة) */
-        .sig-option-bar {
-            display: flex;
-            gap: 4px;
+        /* تصميم نافذة إضافة توقيع المنبثقة (Modal) */
+        .sig-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 2px;
+            z-index: 9999;
         }
 
-        .sig-file-input {
-            font-size: 8pt;
-            width: auto;
-            display: none;
+        .sig-modal-content {
+            background: #fff;
+            width: 420px;
+            max-width: 95%;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            direction: rtl;
         }
 
-        .sig-preview-img {
+        .sig-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #065F46;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: bold;
+            font-size: 12pt;
+            color: #065F46;
+        }
+
+        .sig-modal-close {
+            background: none;
+            border: none;
+            font-size: 14pt;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .saved-sigs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .saved-sig-card {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px;
+            text-align: center;
+            cursor: pointer;
+            background: #f9f9f9;
+            transition: 0.2s;
+        }
+
+        .saved-sig-card:hover {
+            border-color: #065F46;
+            background: #f0fdf4;
+        }
+
+        .saved-sig-card img {
+            max-height: 35px;
             max-width: 100%;
-            max-height: 42px;
+        }
+
+        .sig-tabs-panel {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .sig-tab-btn {
+            flex: 1;
+            padding: 6px;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 9.5pt;
+        }
+
+        .sig-tab-btn.active {
+            background: #065F46;
+            color: white;
+        }
+
+        .sig-pane {
             display: none;
-            margin: 0 auto;
+        }
+
+        .sig-pane.active {
+            display: block;
+        }
+
+        canvas.draw-canvas {
+            width: 100%;
+            height: 110px;
+            border: 1px dashed #999;
+            background: #fff;
+            touch-action: none;
+            cursor: crosshair;
+            border-radius: 4px;
         }
 
         .footer-note {
@@ -260,7 +372,7 @@
             body { background: #fff; padding: 0; margin: 0; }
             .paper { border: none; box-shadow: none; width: 100%; padding: 0; margin: 0; }
             .clear-btn { display: none !important; }
-            .sig-option-bar { display: none !important; }
+            .sig-box-container { border: none !important; background: transparent !important; }
         }
     </style>
 </head>
@@ -295,6 +407,44 @@
         <button class="btn" onclick="sendWhatsApp()">📱 إرسال رابط النموذج عبر الواتساب للمعلم</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة النموذج (صفحة واحدة)</button>
         <button class="btn" style="background-color: #0284C7;" onclick="saveAndSend()">💾 حفظ وإعادة الإرسال للمدير</button>
+    </div>
+</div>
+
+<!-- ==================== نافذة إضافة وإدارة التواقيع المنبثقة (Modal) ==================== -->
+<div id="sigModal" class="sig-modal-overlay">
+    <div class="sig-modal-content">
+        <div class="sig-modal-header">
+            <span>✍️ إضافة توقيع (من تواقيعي)</span>
+            <button class="sig-modal-close" onclick="closeSigModal()">&times;</button>
+        </div>
+
+        <!-- قسم التواقيع المحفوظة مسبقاً -->
+        <div style="margin-bottom: 10px;">
+            <span style="font-size: 9pt; font-weight: bold; color: #333; display: block; margin-bottom: 4px;">التواقيع المحفوظة في جهازك:</span>
+            <div id="savedSigsList" class="saved-sigs-grid">
+                <span style="font-size: 8.5pt; color: #777; grid-column: span 2; text-align: center; padding: 10px;">لا توجد تواقيع محفوظة بعد</span>
+            </div>
+        </div>
+
+        <div class="sig-tabs-panel">
+            <button class="sig-tab-btn active" onclick="switchSigTab('drawTab', event)">✍️ رسم توقيع جديد</button>
+            <button class="sig-tab-btn" onclick="switchSigTab('uploadTab', event)">📂 رفع صورة توقيع</button>
+        </div>
+
+        <!-- تبويب الرسم -->
+        <div id="drawTab" class="sig-pane active">
+            <canvas id="modalCanvas" class="draw-canvas"></canvas>
+            <div style="display: flex; gap: 5px; margin-top: 6px;">
+                <button class="btn" style="background: #dc2626; font-size: 9pt; padding: 4px 8px;" onclick="clearModalCanvas()">مسح الرسم</button>
+                <button class="btn" style="background: #065F46; font-size: 9pt; padding: 4px 8px; flex: 1; justify-content: center;" onclick="saveDrawnSignature()">حفظ واستخدام التوقيع</button>
+            </div>
+        </div>
+
+        <!-- تبويب الرفع -->
+        <div id="uploadTab" class="sig-pane">
+            <input type="file" id="uploadSigFile" accept="image/*" style="margin: 10px 0; font-size: 9.5pt;">
+            <button class="btn" style="background: #065F46; font-size: 9pt; padding: 4px 8px; width: 100%; justify-content: center;" onclick="uploadAndSaveSignature()">رفع وحفظ التوقيع</button>
+        </div>
     </div>
 </div>
 
@@ -378,14 +528,11 @@
                 <span>اسم الرئيس المباشر : <strong>عويد عشبان الرويلي</strong></span>
                 <div>
                     <span style="font-size: 8pt; display: block; text-align: center;">توقيع الرئيس المباشر</span>
-                    <div class="sig-option-bar">
-                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigManager1')">📂 رفع</label>
+                    <div class="sig-box-container" onclick="openSigModal('sigManager1')">
+                        <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
+                        <img id="img_sigManager1" class="sig-rendered-img" alt="توقيع">
                     </div>
-                    <div class="sig-wrapper">
-                        <canvas id="sigManager1"></canvas>
-                        <img id="img_sigManager1" class="sig-preview-img" alt="توقيع">
-                    </div>
-                    <button class="clear-btn" onclick="clearSig('sigManager1')">مسح</button>
+                    <button class="clear-btn" onclick="clearSig('sigManager1')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
@@ -403,14 +550,11 @@
                 </div>
                 <div>
                     <span style="font-size: 8.5pt;">توقيع المعلم:</span>
-                    <div class="sig-option-bar">
-                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigStaff1')">📂 رفع</label>
+                    <div class="sig-box-container" onclick="openSigModal('sigStaff1')">
+                        <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
+                        <img id="img_sigStaff1" class="sig-rendered-img" alt="توقيع">
                     </div>
-                    <div class="sig-wrapper">
-                        <canvas id="sigStaff1"></canvas>
-                        <img id="img_sigStaff1" class="sig-preview-img" alt="توقيع">
-                    </div>
-                    <button class="clear-btn" onclick="clearSig('sigStaff1')">مسح التوقيع</button>
+                    <button class="clear-btn" onclick="clearSig('sigStaff1')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
@@ -437,14 +581,11 @@
                 <span>التاريخ : <input type="text" style="width: 85px; display:inline-block;" placeholder="1448/05/20"></span>
                 <div>
                     <span style="font-size: 8pt; display: block; text-align: center;">توقيع مدير المدرسة</span>
-                    <div class="sig-option-bar">
-                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigDirector1')">📂 رفع</label>
+                    <div class="sig-box-container" onclick="openSigModal('sigDirector1')">
+                        <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
+                        <img id="img_sigDirector1" class="sig-rendered-img" alt="توقيع">
                     </div>
-                    <div class="sig-wrapper">
-                        <canvas id="sigDirector1"></canvas>
-                        <img id="img_sigDirector1" class="sig-preview-img" alt="توقيع">
-                    </div>
-                    <button class="clear-btn" onclick="clearSig('sigDirector1')">مسح</button>
+                    <button class="clear-btn" onclick="clearSig('sigDirector1')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
@@ -552,14 +693,11 @@
                 <span>مدير المدرسة : <strong>عويد عشبان الرويلي</strong></span>
                 <div>
                     <span style="font-size: 8pt; display: block; text-align: center;">توقيع مدير المدرسة</span>
-                    <div class="sig-option-bar">
-                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigDirector2')">📂 رفع</label>
+                    <div class="sig-box-container" onclick="openSigModal('sigDirector2')">
+                        <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
+                        <img id="img_sigDirector2" class="sig-rendered-img" alt="توقيع">
                     </div>
-                    <div class="sig-wrapper">
-                        <canvas id="sigDirector2"></canvas>
-                        <img id="img_sigDirector2" class="sig-preview-img" alt="توقيع">
-                    </div>
-                    <button class="clear-btn" onclick="clearSig('sigDirector2')">مسح</button>
+                    <button class="clear-btn" onclick="clearSig('sigDirector2')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
@@ -576,14 +714,11 @@
                 </div>
                 <div>
                     <span style="font-size: 8.5pt;">توقيع المعلم:</span>
-                    <div class="sig-option-bar">
-                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigStaff2')">📂 رفع</label>
+                    <div class="sig-box-container" onclick="openSigModal('sigStaff2')">
+                        <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
+                        <img id="img_sigStaff2" class="sig-rendered-img" alt="توقيع">
                     </div>
-                    <div class="sig-wrapper">
-                        <canvas id="sigStaff2"></canvas>
-                        <img id="img_sigStaff2" class="sig-preview-img" alt="توقيع">
-                    </div>
-                    <button class="clear-btn" onclick="clearSig('sigStaff2')">مسح التوقيع</button>
+                    <button class="clear-btn" onclick="clearSig('sigStaff2')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
@@ -599,14 +734,11 @@
                 <span>التاريخ : <input type="text" style="width: 85px; display:inline-block;" placeholder="1448/05/20"></span>
                 <div>
                     <span style="font-size: 8pt; display: block; text-align: center;">توقيع المدير</span>
-                    <div class="sig-option-bar">
-                        <label style="font-size: 7.5pt; cursor:pointer;"><input type="file" class="sig-file-input" accept="image/*" onchange="handleSigImage(event, 'sigDirector3')">📂 رفع</label>
+                    <div class="sig-box-container" onclick="openSigModal('sigDirector3')">
+                        <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
+                        <img id="img_sigDirector3" class="sig-rendered-img" alt="توقيع">
                     </div>
-                    <div class="sig-wrapper">
-                        <canvas id="sigDirector3"></canvas>
-                        <img id="img_sigDirector3" class="sig-preview-img" alt="توقيع">
-                    </div>
-                    <button class="clear-btn" onclick="clearSig('sigDirector3')">مسح</button>
+                    <button class="clear-btn" onclick="clearSig('sigDirector3')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
@@ -667,6 +799,10 @@
         { name: "خالد شاقي الرويلي", id: "1070103708", spec: "مساعد إداري", job: "مساعد إداري", phone: "966553369243" }
     ];
 
+    let currentTargetSigId = null;
+    let modalCanvasCtx = null;
+    let isDrawingModal = false;
+
     window.onload = function() {
         const ctrlSel = document.getElementById('staffSelect');
         const m1Sel = document.getElementById('m1_name_select');
@@ -681,13 +817,21 @@
         m1Sel.innerHTML = options;
         m2Sel.innerHTML = options;
 
-        // تهيئة لوحات التوقيع الإلكتروني
-        setupCanvas('sigManager1');
-        setupCanvas('sigStaff1');
-        setupCanvas('sigDirector1');
-        setupCanvas('sigDirector2');
-        setupCanvas('sigStaff2');
-        setupCanvas('sigDirector3');
+        // تهيئة لوحة الرسم داخل النافذة المنبثقة
+        const modalCvs = document.getElementById('modalCanvas');
+        modalCanvasCtx = modalCvs.getContext('2d');
+        modalCvs.width = 380;
+        modalCvs.height = 110;
+
+        modalCvs.addEventListener('mousedown', startModalDraw);
+        modalCvs.addEventListener('mousemove', drawModalMove);
+        modalCvs.addEventListener('mouseup', endModalDraw);
+
+        modalCvs.addEventListener('touchstart', startModalDraw, { passive: false });
+        modalCvs.addEventListener('touchmove', drawModalMove, { passive: false });
+        modalCvs.addEventListener('touchend', endModalDraw);
+
+        loadSavedSignaturesUI();
     };
 
     function onStaffChange() {
@@ -749,83 +893,134 @@
         event.currentTarget.classList.add('active');
     }
 
-    function setupCanvas(id) {
-        const cvs = document.getElementById(id);
-        if(!cvs) return;
-        const ctx = cvs.getContext('2d');
-        let drawing = false;
+    /* دوام نافذة التواقيع المنبثقة (Modal) */
+    function openSigModal(targetId) {
+        currentTargetSigId = targetId;
+        document.getElementById('sigModal').style.display = 'flex';
+        loadSavedSignaturesUI();
+    }
 
-        cvs.width = cvs.parentElement.offsetWidth;
-        cvs.height = cvs.parentElement.offsetHeight;
+    function closeSigModal() {
+        document.getElementById('sigModal').style.display = 'none';
+        currentTargetSigId = null;
+        clearModalCanvas();
+    }
 
-        function getPos(e) {
-            const rect = cvs.getBoundingClientRect();
-            let clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            let clientY = e.clientY || (e.touches && e.touches[0].clientY);
-            return { x: clientX - rect.left, y: clientY - rect.top };
+    function switchSigTab(tabId, evt) {
+        document.querySelectorAll('.sig-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.sig-tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    /* رسم داخل النافذة */
+    function getModalPos(e) {
+        const cvs = document.getElementById('modalCanvas');
+        const rect = cvs.getBoundingClientRect();
+        let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startModalDraw(e) {
+        isDrawingModal = true;
+        const pos = getModalPos(e);
+        modalCanvasCtx.beginPath();
+        modalCanvasCtx.moveTo(pos.x, pos.y);
+        e.preventDefault();
+    }
+
+    function drawModalMove(e) {
+        if (!isDrawingModal) return;
+        const pos = getModalPos(e);
+        modalCanvasCtx.lineWidth = 2.5;
+        modalCanvasCtx.lineCap = 'round';
+        modalCanvasCtx.strokeStyle = '#000';
+        modalCanvasCtx.lineTo(pos.x, pos.y);
+        modalCanvasCtx.stroke();
+        e.preventDefault();
+    }
+
+    function endModalDraw() { isDrawingModal = false; }
+
+    function clearModalCanvas() {
+        const cvs = document.getElementById('modalCanvas');
+        modalCanvasCtx.clearRect(0, 0, cvs.width, cvs.height);
+    }
+
+    /* حفظ التوقيع في الـ localStorage ليكون ضمن "تواقيعي" */
+    function getStoredSignatures() {
+        try {
+            return JSON.parse(localStorage.getItem('my_school_signatures') || '[]');
+        } catch(e) { return []; }
+    }
+
+    function saveSignatureToStorage(dataUrl) {
+        let sigs = getStoredSignatures();
+        sigs.push(dataUrl);
+        localStorage.setItem('my_school_signatures', JSON.stringify(sigs));
+    }
+
+    function loadSavedSignaturesUI() {
+        const listDiv = document.getElementById('savedSigsList');
+        const sigs = getStoredSignatures();
+        if (sigs.length === 0) {
+            listDiv.innerHTML = '<span style="font-size: 8.5pt; color: #777; grid-column: span 2; text-align: center; padding: 10px;">لا توجد تواقيع محفوظة بعد</span>';
+            return;
         }
+        let html = '';
+        sigs.forEach((sig, index) => {
+            html += `<div class="saved-sig-card" onclick="applySavedSignature('${sig}')">
+                <img src="${sig}" alt="توقيع ${index+1}">
+                <div style="font-size: 7.5pt; color: #065F46; font-weight: bold; margin-top: 2px;">توقيع ${index+1} (انقر للاستخدام)</div>
+            </div>`;
+        });
+        listDiv.innerHTML = html;
+    }
 
-        function start(e) {
-            drawing = true;
-            const pos = getPos(e);
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-            e.preventDefault();
+    function saveDrawnSignature() {
+        const cvs = document.getElementById('modalCanvas');
+        const dataUrl = cvs.toDataURL('image/png');
+        saveSignatureToStorage(dataUrl);
+        applySavedSignature(dataUrl);
+    }
+
+    function uploadAndSaveSignature() {
+        const fileInput = document.getElementById('uploadSigFile');
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                saveSignatureToStorage(dataUrl);
+                applySavedSignature(dataUrl);
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            alert('يرجى اختيار ملف صورة أولاً!');
         }
+    }
 
-        function move(e) {
-            if (!drawing) return;
-            const pos = getPos(e);
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#000';
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            e.preventDefault();
-        }
+    function applySavedSignature(dataUrl) {
+        if (!currentTargetSigId) return;
+        const img = document.getElementById('img_' + currentTargetSigId);
+        const container = img.parentElement;
+        const txt = container.querySelector('.sig-placeholder-text');
 
-        function end() { drawing = false; }
+        img.src = dataUrl;
+        img.style.display = 'block';
+        if(txt) txt.style.display = 'none';
 
-        cvs.addEventListener('mousedown', start);
-        cvs.addEventListener('mousemove', move);
-        cvs.addEventListener('mouseup', end);
-
-        cvs.addEventListener('touchstart', start, { passive: false });
-        cvs.addEventListener('touchmove', move, { passive: false });
-        cvs.addEventListener('touchend', end);
+        closeSigModal();
     }
 
     function clearSig(id) {
-        const cvs = document.getElementById(id);
-        const ctx = cvs.getContext('2d');
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-        
-        // إخفاء صورة التوقيع المرفوعة إن وجدت
         const img = document.getElementById('img_' + id);
-        if(img) {
-            img.src = '';
-            img.style.display = 'none';
-        }
-        if(cvs) {
-            cvs.style.display = 'block';
-        }
-    }
+        const container = img.parentElement;
+        const txt = container.querySelector('.sig-placeholder-text');
 
-    function handleSigImage(event, id) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById('img_' + id);
-                const cvs = document.getElementById(id);
-                if(img && cvs) {
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    cvs.style.display = 'none'; // إخفاء الكانفاس وعرض الصورة المرفوعة
-                }
-            }
-            reader.readAsDataURL(file);
-        }
+        img.src = '';
+        img.style.display = 'none';
+        if(txt) txt.style.display = 'flex';
     }
 </script>
 
