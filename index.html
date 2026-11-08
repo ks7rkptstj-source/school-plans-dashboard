@@ -559,7 +559,7 @@
         <div class="section-box">
             <div class="section-title">( 1 ) طلب الإفادة :</div>
             <p>المكرم / <strong class="target-staff-name">..................................................</strong> وفقه الله</p>
-            <p>السلام عليكم ورحمة الله وبركاته .. وبعد : من خلال متابعة الدوام تبين غيابكم ، آمل الإفادة عن أسباب ذلك وعليكم تقديم ما تؤيد عذركم خلال أسبوع من تاريخه .</p>
+            <p>السلام عليكم ورحمة الله وبركاته .. وبعد : من خلال متابعة الدوام تبين غيابكم ، آمل الإفادة عن أسباب ذلك وعليكم تقديم ما يؤيد عذركم خلال أسبوع من تاريخه .</p>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <span>اسم الرئيس المباشر : <strong>عويد عشبان الرويلي</strong></span>
                 <div>
@@ -627,7 +627,7 @@
         </div>
 
         <div class="footer-note">
-            <strong>ملاحظات هامة :</strong> 1- تستكمل الاستمارة من المدير المباشر وإصدار القرار. 2- إذا سبق عطلة نهاية الأسبوع غياب وألحقها غياب تحتسب كاملة. 3- يعطى المتغيب مدة أسبوع لتقديم ما تؤيد عذره.
+            <strong>ملاحظات هامة :</strong> 1- تستكمل الاستمارة من المدير المباشر وإصدار القرار. 2- إذا سبق عطلة نهاية الأسبوع غياب وألحقها غياب تحتسب كاملة. 3- يعطى المتغيب مدة أسبوع لتقديم ما يؤيد عذره.
         </div>
 
         <div class="designer-credit">
@@ -729,7 +729,7 @@
                 </div>
             </div>
 
-            <p>عليه نأمل توضيح أسباب ذلك مع إرفاق ما تؤيد عذركم ،،،</p>
+            <p>عليه نأمل توضيح أسباب ذلك مع إرفاق ما يؤيد عذركم ،،،</p>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <span>مدير المدرسة : <strong>عويد عشبان الرويلي</strong></span>
                 <div>
@@ -851,7 +851,6 @@
     let currentActiveModel = 'model1';
     let isTeacherMode = false;
 
-    // دالتين للترميز الآمن للروابط لمنع تكسر رابط الواتساب
     function urlSafeEncode(str) {
         return btoa(unescape(encodeURIComponent(str)))
             .replace(/\+/g, '-')
@@ -1065,8 +1064,8 @@
         const baseUrl = window.location.href.split('?')[0];
         const directUrl = `${baseUrl}?data=${encodedData}`;
 
-        const msg = `المكرم المعلم/الموظف: ${name} المحترم،%0Aالسلام عليكم ورحمة الله وبركاته..%0Aنأمل الاطلاع على تفاصيل المساءلة وتعبئة الإفادة والتوقيع عبر الرابط المباشر الآمن:%0A${directUrl}`;
-        window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
+        const msg = `المكرم المعلم/الموظف: ${name} المحترم،\nالسلام عليكم ورحمة الله وبركاته..\nنأمل الاطلاع على تفاصيل المساءلة وتعبئة الإفادة والتوقيع عبر الرابط المباشر الآمن:\n${directUrl}`;
+        window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     function teacherSendBack(modelNum) {
@@ -1084,13 +1083,14 @@
             return;
         }
 
-        const adminPhone = "966553369243";
-        let reportMsg = `📋 *إفادة معلم معتمدة وموقعة*%0A`;
+        const adminPhone = "966553369243"; // رقم المدير (مساعد إداري / مدير المدرسة)
         const reportName = modelNum === '1' ? 'نموذج مساءلة غياب' : 'نموذج تنبيه معلم';
-        reportMsg += `📌 *نوع النموذج:* ${reportName}%0A`;
-        reportMsg += `👤 *اسم المعلم:* ${staffName}%0A`;
-        reportMsg += `💬 *نص الإفادة:* ${excuseText}%0A`;
-        reportMsg += `✍️ *الحالة:* تم توقيع الإفادة إلكترونياً وهي جاهزة للاعتماد.`;
+        
+        let reportMsg = `📋 *إفادة معلم معتمدة وموقعة*\n` +
+                        `📌 *نوع النموذج:* ${reportName}\n` +
+                        `👤 *اسم المعلم:* ${staffName}\n` +
+                        `💬 *نص الإفادة:* ${excuseText}\n` +
+                        `✍️ *الحالة:* تم توقيع الإفادة إلكترونياً وهي جاهزة للاعتماد.`;
 
         window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(reportMsg)}`, '_blank');
         alert('تم حفظ الإفادة وتوقيعك بنجاح، وتوجيهها للمدير!');
