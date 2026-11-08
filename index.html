@@ -379,7 +379,7 @@
             display: block;
         }
 
-        .teacher-alert-banner {
+        .system-banner {
             background: #FEF3C7;
             border: 1px solid #F59E0B;
             color: #92400E;
@@ -402,7 +402,7 @@
         }
 
         @media print {
-            .no-print, .teacher-alert-banner { display: none !important; }
+            .no-print, .system-banner { display: none !important; }
             body { background: #fff; padding: 0; margin: 0; }
             .paper { border: none; box-shadow: none; width: 100%; padding: 0; margin: 0; }
             .clear-btn { display: none !important; }
@@ -412,12 +412,12 @@
 </head>
 <body>
 
-<div id="teacherBanner" class="teacher-alert-banner" style="display: none;">
-    📌 المكرم المعلم/الموظف: يرجى كتابة إفادتك وتوقيعك في القسم المخصص بالأسفل ثم النقر على زر الإرسال للمدير.
+<div id="systemBanner" class="system-banner" style="display: none;">
+    📌 <span id="bannerText">مرحباً بك</span>
 </div>
 
 <div class="no-print" id="adminControlPanel">
-    <h2>منصة المساءلات الإلكترونية والواتساب المباشر</h2>
+    <h2>منصة المساءلات الرسمية والواتساب المباشر</h2>
     
     <div class="tabs">
         <button class="tab-btn active" id="tab_model1" onclick="switchModel('model1')">1. نموذج مساءلة غياب</button>
@@ -442,12 +442,12 @@
     </div>
 
     <div class="form-row">
-        <button class="btn" onclick="sendWhatsApp()">📱 إرسال رابط النموذج المعالج عبر الواتساب للمعلم</button>
+        <button class="btn" onclick="sendWhatsAppToTeacher()">📱 إرسال رابط النموذج للمعلم</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة النموذج (صفحة واحدة)</button>
     </div>
 </div>
 
-<!-- ==================== نافذة إضافة وإدارة التواقيع المنبثقة (Modal) ==================== -->
+<!-- ==================== نافذة التواقيع المنبثقة ==================== -->
 <div id="sigModal" class="sig-modal-overlay">
     <div class="sig-modal-content">
         <div class="sig-modal-header">
@@ -467,7 +467,6 @@
             <button class="sig-tab-btn" onclick="switchSigTab('uploadTab', event)">📂 رفع صورة توقيع</button>
         </div>
 
-        <!-- تبويب الرسم -->
         <div id="drawTab" class="sig-pane active">
             <canvas id="modalCanvas" class="draw-canvas"></canvas>
             <div style="display: flex; gap: 5px; margin-top: 6px;">
@@ -476,7 +475,6 @@
             </div>
         </div>
 
-        <!-- تبويب الرفع -->
         <div id="uploadTab" class="sig-pane">
             <input type="file" id="uploadSigFile" accept="image/*" style="margin: 10px 0; font-size: 9.5pt;">
             <button class="btn" style="background: #065F46; font-size: 9pt; padding: 4px 8px; width: 100%; justify-content: center;" onclick="uploadAndSaveSignature()">رفع وحفظ التوقيع</button>
@@ -568,14 +566,14 @@
                         <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
                         <img id="img_sigManager1" class="sig-rendered-img" alt="توقيع المدير">
                     </div>
-                    <button class="clear-btn admin-only" onclick="clearSig('sigManager1')">حذف التوقيع</button>
+                    <button class="clear-btn" onclick="clearSig('sigManager1')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
 
         <!-- ( 2 ) الإفادة -->
         <div class="section-box" style="background: #FFFDF4;">
-            <div class="section-title" style="background: #FEF3C7;">( 2 ) الإفادة (خاص بالمعلم/الموظف - متاح للتعبئة) :</div>
+            <div class="section-title" style="background: #FEF3C7;">( 2 ) الإفادة (خاص بالمعلم/الموظف) :</div>
             <p>المكرم مدير مدرسة عبدالله بن مسعود الابتدائية وفقه الله .. أفيدكم أن غيابي كان للأسباب التالية :</p>
             <textarea id="m1_excuse" rows="2" style="margin: 2px 0;" placeholder="اكتب أسباب العذر هنا..."></textarea>
             
@@ -621,7 +619,7 @@
                         <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
                         <img id="img_sigDirector1" class="sig-rendered-img" alt="توقيع المدير">
                     </div>
-                    <button class="clear-btn admin-only" onclick="clearSig('sigDirector1')">حذف التوقيع</button>
+                    <button class="clear-btn" onclick="clearSig('sigDirector1')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
@@ -634,9 +632,10 @@
             إعداد وتصميم مساعد إداري خالد شاقي الرويلي
         </div>
 
-        <!-- زر الحفظ وإرسال المعلم -->
-        <div id="teacherSendContainer1" style="text-align: center; margin-top: 15px; display: none;" class="no-print">
-            <button class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px;" onclick="teacherSendBack('1')">💾 حفظ وإرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
+        <!-- أزرار الإجراءات حسب دور المستخدم -->
+        <div style="text-align: center; margin-top: 15px;" class="no-print">
+            <button id="teacherActionBtn1" class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px; display: none;" onclick="sendBackToAdmin('1')">📤 إرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
+            <button id="adminFinalPrintBtn1" class="btn btn-print" style="font-size: 12pt; padding: 10px 20px; display: none;" onclick="window.print()">🖨️ اعتماد وطباعة النموذج النهائي</button>
         </div>
     </div>
 </div>
@@ -738,13 +737,13 @@
                         <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
                         <img id="img_sigDirector2" class="sig-rendered-img" alt="توقيع المدير">
                     </div>
-                    <button class="clear-btn admin-only" onclick="clearSig('sigDirector2')">حذف التوقيع</button>
+                    <button class="clear-btn" onclick="clearSig('sigDirector2')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
 
         <div class="section-box" style="background: #FFFDF4;">
-            <div class="section-title" style="background: #FEF3C7;">إفادة المعلم (خاص بالمعلم/الموظف - متاح للتعبئة) :</div>
+            <div class="section-title" style="background: #FEF3C7;">إفادة المعلم (خاص بالمعلم/الموظف) :</div>
             <p>المكرم / مدير مدرسة عبدالله بن مسعود الابتدائية .. أفيدكم أن أسباب ذلك ما يلي :</p>
             <textarea id="m2_excuse" rows="2" style="margin: 2px 0;" placeholder="أسباب التأخر أو الانصراف أو الغياب..."></textarea>
             
@@ -779,7 +778,7 @@
                         <span class="sig-placeholder-text">✍️ إضافة توقيع</span>
                         <img id="img_sigDirector3" class="sig-rendered-img" alt="توقيع المدير">
                     </div>
-                    <button class="clear-btn admin-only" onclick="clearSig('sigDirector3')">حذف التوقيع</button>
+                    <button class="clear-btn" onclick="clearSig('sigDirector3')">حذف التوقيع</button>
                 </div>
             </div>
         </div>
@@ -792,9 +791,10 @@
             إعداد وتصميم مساعد إداري خالد شاقي الرويلي
         </div>
 
-        <!-- زر الحفظ وإرسال المعلم -->
-        <div id="teacherSendContainer2" style="text-align: center; margin-top: 15px; display: none;" class="no-print">
-            <button class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px;" onclick="teacherSendBack('2')">💾 حفظ وإرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
+        <!-- أزرار الإجراءات للنموذج الثاني -->
+        <div style="text-align: center; margin-top: 15px;" class="no-print">
+            <button id="teacherActionBtn2" class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px; display: none;" onclick="sendBackToAdmin('2')">📤 إرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
+            <button id="adminFinalPrintBtn2" class="btn btn-print" style="font-size: 12pt; padding: 10px 20px; display: none;" onclick="window.print()">🖨️ اعتماد وطباعة النموذج النهائي</button>
         </div>
     </div>
 </div>
@@ -849,7 +849,7 @@
     let modalCanvasCtx = null;
     let isDrawingModal = false;
     let currentActiveModel = 'model1';
-    let isTeacherMode = false;
+    let userRole = 'admin'; // admin أو teacher أو final_admin
 
     function urlSafeEncode(str) {
         return btoa(unescape(encodeURIComponent(str)))
@@ -893,85 +893,140 @@
         modalCvs.addEventListener('touchend', endModalDraw);
 
         loadSavedSignaturesUI();
-        checkEncryptedUrlData();
+        checkUrlParameters();
     };
 
-    function checkEncryptedUrlData() {
+    function checkUrlParameters() {
         const urlParams = new URLSearchParams(window.location.search);
         const encodedData = urlParams.get('data');
 
         if (encodedData) {
             try {
                 const jsonString = urlSafeDecode(encodedData);
-                const payload = JSON.parse(jsonString);
+                const p = JSON.parse(jsonString);
 
-                isTeacherMode = true;
-                currentActiveModel = payload.m || 'model1';
+                currentActiveModel = p.m || 'model1';
                 switchModel(currentActiveModel);
 
-                document.getElementById('adminControlPanel').style.display = 'none';
-                document.getElementById('teacherBanner').style.display = 'block';
+                if (p.role === 'teacher_done') {
+                    // المرحلة الرابعة: رجعت للمدير بعد تعبئة المعلم
+                    userRole = 'final_admin';
+                    document.getElementById('adminControlPanel').style.display = 'none';
+                    document.getElementById('systemBanner').style.display = 'block';
+                    document.getElementById('bannerText').innerText = "تمت إفادة المعلم بنجاح. يرجى اختيار رأي مدير المدرسة وتوقيع الاعتماد النهائي ثم الطباعة.";
 
-                if (currentActiveModel === 'model1') {
-                    document.getElementById('teacherSendContainer1').style.display = 'block';
+                    if (currentActiveModel === 'model1') {
+                        document.getElementById('adminFinalPrintBtn1').style.display = 'inline-block';
+                    } else {
+                        document.getElementById('adminFinalPrintBtn2').style.display = 'inline-block';
+                    }
                 } else {
-                    document.getElementById('teacherSendContainer2').style.display = 'block';
+                    // المرحلة الثانية: وصلت للمعلم للتعبئة
+                    userRole = 'teacher';
+                    document.getElementById('adminControlPanel').style.display = 'none';
+                    document.getElementById('systemBanner').style.display = 'block';
+                    document.getElementById('bannerText').innerText = "المكرم المعلم/الموظف: يرجى كتابة إفادتك وتوقيعك في القسم المخصص بالأسفل ثم النقر على زر الإرسال للمدير.";
+
+                    if (currentActiveModel === 'model1') {
+                        document.getElementById('teacherActionBtn1').style.display = 'inline-block';
+                    } else {
+                        document.getElementById('teacherActionBtn2').style.display = 'inline-block';
+                    }
                 }
 
-                if (payload.m === 'model1') {
-                    document.getElementById('m1_name_select').value = payload.s;
-                    updateStaffDetails(payload.s);
-                    document.getElementById('m1_doc_no').value = payload.dn || '';
-                    document.getElementById('m1_header_date').value = payload.hd || '';
-                    document.getElementById('m1_attachments').value = payload.at || '0';
-                    document.getElementById('m1_level').value = payload.lv || '';
-                    document.getElementById('m1_degree').value = payload.dg || '';
-                    document.getElementById('m1_job_num').value = payload.jn || '';
-                    document.getElementById('m1_days_count').value = payload.dc || '';
-                    document.getElementById('m1_from_day').value = payload.fd || '';
-                    document.getElementById('m1_from_date').value = payload.fdt || '';
-                    document.getElementById('m1_to_day').value = payload.td || '';
-                    document.getElementById('m1_to_date').value = payload.tdt || '';
+                // تعبئة البيانات المشتركة
+                if (p.m === 'model1') {
+                    document.getElementById('m1_name_select').value = p.s;
+                    updateStaffDetails(p.s);
+                    document.getElementById('m1_doc_no').value = p.dn || '';
+                    document.getElementById('m1_header_date').value = p.hd || '';
+                    document.getElementById('m1_attachments').value = p.at || '0';
+                    document.getElementById('m1_level').value = p.lv || '';
+                    document.getElementById('m1_degree').value = p.dg || '';
+                    document.getElementById('m1_job_num').value = p.jn || '';
+                    document.getElementById('m1_days_count').value = p.dc || '';
+                    document.getElementById('m1_from_day').value = p.fd || '';
+                    document.getElementById('m1_from_date').value = p.fdt || '';
+                    document.getElementById('m1_to_day').value = p.td || '';
+                    document.getElementById('m1_to_date').value = p.tdt || '';
+
+                    if(p.mSig) {
+                        document.getElementById('img_sigManager1').src = p.mSig;
+                        document.getElementById('img_sigManager1').style.display = 'block';
+                        document.getElementById('img_sigManager1').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
+                    }
+
+                    if (p.role === 'teacher_done') {
+                        document.getElementById('m1_excuse').value = p.excuse || '';
+                        if(p.tSig) {
+                            document.getElementById('img_sigStaff1').src = p.tSig;
+                            document.getElementById('img_sigStaff1').style.display = 'block';
+                            document.getElementById('img_sigStaff1').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
+                        }
+                    }
                 } else {
-                    document.getElementById('m2_name_select').value = payload.s;
-                    updateStaffDetails(payload.s);
-                    document.getElementById('m2_doc_no').value = payload.dn || '';
-                    document.getElementById('m2_header_date').value = payload.hd || '';
-                    document.getElementById('m2_level').value = payload.lv || '';
-                    document.getElementById('m2_job_num').value = payload.jn || '';
-                    document.getElementById('m2_incident_day').value = payload.id || '';
-                    document.getElementById('m2_incident_date').value = payload.idt || '';
+                    document.getElementById('m2_name_select').value = p.s;
+                    updateStaffDetails(p.s);
+                    document.getElementById('m2_doc_no').value = p.dn || '';
+                    document.getElementById('m2_header_date').value = p.hd || '';
+                    document.getElementById('m2_level').value = p.lv || '';
+                    document.getElementById('m2_job_num').value = p.jn || '';
+                    document.getElementById('m2_incident_day').value = p.id || '';
+                    document.getElementById('m2_incident_date').value = p.idt || '';
                     
-                    if(payload.c1) document.getElementById('m2_chk_1').value = '✔';
-                    document.getElementById('m2_val_1').value = payload.v1 || '';
-                    if(payload.c2) document.getElementById('m2_chk_2').value = '✔';
-                    document.getElementById('m2_val_2a').value = payload.v2a || '';
-                    document.getElementById('m2_val_2b').value = payload.v2b || '';
-                    if(payload.c3) document.getElementById('m2_chk_3').value = '✔';
-                    document.getElementById('m2_val_3').value = payload.v3 || '';
-                    if(payload.c4) document.getElementById('m2_chk_4').value = '✔';
-                    document.getElementById('m2_val_4a').value = payload.v4a || '';
-                    document.getElementById('m2_val_4b').value = payload.v4b || '';
-                    if(payload.c5) document.getElementById('m2_chk_5').value = '✔';
-                    document.getElementById('m2_val_5').value = payload.v5 || '';
+                    if(p.c1) document.getElementById('m2_chk_1').value = '✔';
+                    document.getElementById('m2_val_1').value = p.v1 || '';
+                    if(p.c2) document.getElementById('m2_chk_2').value = '✔';
+                    document.getElementById('m2_val_2a').value = p.v2a || '';
+                    document.getElementById('m2_val_2b').value = p.v2b || '';
+                    if(p.c3) document.getElementById('m2_chk_3').value = '✔';
+                    document.getElementById('m2_val_3').value = p.v3 || '';
+                    if(p.c4) document.getElementById('m2_chk_4').value = '✔';
+                    document.getElementById('m2_val_4a').value = p.v4a || '';
+                    document.getElementById('m2_val_4b').value = p.v4b || '';
+                    if(p.c5) document.getElementById('m2_chk_5').value = '✔';
+                    document.getElementById('m2_val_5').value = p.v5 || '';
+
+                    if(p.mSig) {
+                        document.getElementById('img_sigDirector2').src = p.mSig;
+                        document.getElementById('img_sigDirector2').style.display = 'block';
+                        document.getElementById('img_sigDirector2').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
+                    }
+
+                    if (p.role === 'teacher_done') {
+                        document.getElementById('m2_excuse').value = p.excuse || '';
+                        if(p.tSig) {
+                            document.getElementById('img_sigStaff2').src = p.tSig;
+                            document.getElementById('img_sigStaff2').style.display = 'block';
+                            document.getElementById('img_sigStaff2').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
+                        }
+                    }
                 }
 
-                lockAdminFields();
+                applyPermissions();
 
             } catch(e) {
-                console.error("خطأ في فك تشفير البيانات:", e);
+                console.error("خطأ في قراءة البيانات:", e);
             }
         }
     }
 
-    function lockAdminFields() {
+    // تطبيق صلاحيات القفل والفتح حسب دور المستخدم
+    function applyPermissions() {
         const inputs = document.querySelectorAll('input, select, textarea');
         inputs.forEach(inp => {
-            if (!inp.id.includes('excuse') && !inp.id.includes('Staff')) {
-                inp.disabled = true;
+            if (userRole === 'teacher') {
+                // المعلم يفتح فقط خانة الإفادة وتاريخها
+                if (!inp.id.includes('excuse')) {
+                    inp.disabled = true;
+                }
+            } else if (userRole === 'final_admin') {
+                // المدير في المرحلة الأخيرة يفتح فقط قرارات المدير وتاريخه
+                if (!inp.id.includes('opinion') && !inp.id.includes('dir_date')) {
+                    inp.disabled = true;
+                }
             }
         });
-        document.querySelectorAll('.admin-only').forEach(btn => btn.style.display = 'none');
     }
 
     function onStaffChange() {
@@ -983,7 +1038,7 @@
     }
 
     function syncName(sel) {
-        if(isTeacherMode) return;
+        if(userRole !== 'admin') return;
         const idx = sel.value;
         document.getElementById('staffSelect').value = idx;
         document.getElementById('m1_name_select').value = idx;
@@ -1010,7 +1065,8 @@
         document.querySelectorAll('.target-staff-name').forEach(el => el.innerText = person.name);
     }
 
-    function sendWhatsApp() {
+    // المدير يرسل الرابط للمعلم
+    function sendWhatsAppToTeacher() {
         const phone = document.getElementById('ctrl_phone').value;
         const idx = document.getElementById('staffSelect').value;
         if (!idx || !phone) {
@@ -1021,7 +1077,8 @@
         const name = staffList[idx].name;
         let payload = {
             m: currentActiveModel,
-            s: idx
+            s: idx,
+            role: 'teacher_pending'
         };
 
         if (currentActiveModel === 'model1') {
@@ -1036,6 +1093,7 @@
             payload.fdt = document.getElementById('m1_from_date').value;
             payload.td = document.getElementById('m1_to_day').value;
             payload.tdt = document.getElementById('m1_to_date').value;
+            payload.mSig = document.getElementById('img_sigManager1').src || '';
         } else {
             payload.dn = document.getElementById('m2_doc_no').value;
             payload.hd = document.getElementById('m2_header_date').value;
@@ -1043,7 +1101,6 @@
             payload.jn = document.getElementById('m2_job_num').value;
             payload.id = document.getElementById('m2_incident_day').value;
             payload.idt = document.getElementById('m2_incident_date').value;
-            
             payload.c1 = document.getElementById('m2_chk_1').value === '✔' ? 1 : 0;
             payload.v1 = document.getElementById('m2_val_1').value;
             payload.c2 = document.getElementById('m2_chk_2').value === '✔' ? 1 : 0;
@@ -1056,23 +1113,21 @@
             payload.v4b = document.getElementById('m2_val_4b').value;
             payload.c5 = document.getElementById('m2_chk_5').value === '✔' ? 1 : 0;
             payload.v5 = document.getElementById('m2_val_5').value;
+            payload.mSig = document.getElementById('img_sigDirector2').src || '';
         }
 
-        const jsonString = JSON.stringify(payload);
-        const encodedData = urlSafeEncode(jsonString);
-
+        const encodedData = urlSafeEncode(JSON.stringify(payload));
         const baseUrl = window.location.href.split('?')[0];
         const directUrl = `${baseUrl}?data=${encodedData}`;
 
-        const msg = `المكرم المعلم/الموظف: ${name} المحترم،\nالسلام عليكم ورحمة الله وبركاته..\nنأمل الاطلاع على تفاصيل المساءلة وتعبئة الإفادة والتوقيع عبر الرابط المباشر الآمن:\n${directUrl}`;
+        const msg = `المكرم المعلم/الموظف: ${name} المحترم،\nالسلام عليكم ورحمة الله وبركاته..\nنأمل الاطلاع على تفاصيل المساءلة وتعبئة الإفادة والتوقيع عبر الرابط الآمن:\n${directUrl}`;
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    function teacherSendBack(modelNum) {
+    // المعلم يرسل النموذج مكتوباً وملقحاً بالبيانات والإفادة للمدير
+    function sendBackToAdmin(modelNum) {
         const excuseText = modelNum === '1' ? document.getElementById('m1_excuse').value : document.getElementById('m2_excuse').value;
         const staffSig = modelNum === '1' ? document.getElementById('img_sigStaff1').src : document.getElementById('img_sigStaff2').src;
-        const staffIdx = document.getElementById('m1_name_select').value;
-        const staffName = staffList[staffIdx] ? staffList[staffIdx].name : "المعلم";
 
         if (!excuseText.trim()) {
             alert('يرجى كتابة الإفادة أولاً قبل الإرسال!');
@@ -1083,17 +1138,37 @@
             return;
         }
 
-        const adminPhone = "966553369243"; // رقم المدير (مساعد إداري / مدير المدرسة)
-        const reportName = modelNum === '1' ? 'نموذج مساءلة غياب' : 'نموذج تنبيه معلم';
-        
-        let reportMsg = `📋 *إفادة معلم معتمدة وموقعة*\n` +
-                        `📌 *نوع النموذج:* ${reportName}\n` +
-                        `👤 *اسم المعلم:* ${staffName}\n` +
-                        `💬 *نص الإفادة:* ${excuseText}\n` +
-                        `✍️ *الحالة:* تم توقيع الإفادة إلكترونياً وهي جاهزة للاعتماد.`;
+        // جلب البيانات الأصلية الحالية وتحديثها بدور (teacher_done) مع إضافة الإفادة وتوقيع المعلم
+        const urlParams = new URLSearchParams(window.location.search);
+        let payload = {};
+        try {
+            payload = JSON.parse(urlSafeDecode(urlParams.get('data')));
+        } catch(e) {
+            alert('حدث خطأ في استرجاع البيانات الأساسية.');
+            return;
+        }
 
-        window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(reportMsg)}`, '_blank');
-        alert('تم حفظ الإفادة وتوقيعك بنجاح، وتوجيهها للمدير!');
+        payload.role = 'teacher_done';
+        payload.excuse = excuseText;
+        payload.tSig = staffSig;
+
+        const encodedData = urlSafeEncode(JSON.stringify(payload));
+        const baseUrl = window.location.href.split('?')[0];
+        const returnUrl = `${baseUrl}?data=${encodedData}`;
+
+        const adminPhone = "966553369243"; // رقم المدير
+        const staffIdx = document.getElementById(modelNum === '1' ? 'm1_name_select' : 'm2_name_select').value;
+        const staffName = staffList[staffIdx] ? staffList[staffIdx].name : "المعلم";
+        const reportName = modelNum === '1' ? 'نموذج مساءلة غياب' : 'نموذج تنبيه معلم';
+
+        const msg = `📋 *إفادة معلم معتمدة وموقعة*\n` +
+                    `📌 *نوع النموذج:* ${reportName}\n` +
+                    `👤 *اسم المعلم:* ${staffName}\n` +
+                    `💬 *نص الإفادة:* ${excuseText}\n\n` +
+                    `🔗 *انقر هنا لاعتماد النموذج والتوقيع النهائي والطباعة:* \n${returnUrl}`;
+
+        window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(msg)}`, '_blank');
+        alert('تم إرسال إفادتك وتوقيعك بنجاح إلى مدير المدرسة!');
     }
 
     function switchModel(m) {
@@ -1106,8 +1181,12 @@
     }
 
     function openSigModal(targetId) {
-        if (isTeacherMode && !targetId.includes('Staff')) {
+        if (userRole === 'teacher' && !targetId.includes('Staff')) {
             alert('عذراً، هذا الحقل خاص بتوقيع الإدارة ولا يمكن تعديله.');
+            return;
+        }
+        if (userRole === 'final_admin' && targetId.includes('Staff')) {
+            alert('هذا القسم خاص بتوقيع المعلم.');
             return;
         }
         currentTargetSigId = targetId;
@@ -1236,7 +1315,7 @@
     }
 
     function clearSig(id) {
-        if (isTeacherMode && !id.includes('Staff')) {
+        if (userRole === 'teacher' && !id.includes('Staff')) {
             alert('غير مسموح لك بحذف توقيع الإدارة.');
             return;
         }
