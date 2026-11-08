@@ -442,7 +442,7 @@
     </div>
 
     <div class="form-row">
-        <button class="btn" onclick="sendWhatsAppToTeacher()">📱 إرسال رابط النموذج للمعلم</button>
+        <button class="btn" onclick="sendWhatsAppToTeacher()">📱 إرسال رابط النموذج القصير للمعلم</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة النموذج (صفحة واحدة)</button>
     </div>
 </div>
@@ -632,7 +632,6 @@
             إعداد وتصميم مساعد إداري خالد شاقي الرويلي
         </div>
 
-        <!-- أزرار الإجراءات حسب دور المستخدم -->
         <div style="text-align: center; margin-top: 15px;" class="no-print">
             <button id="teacherActionBtn1" class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px; display: none;" onclick="sendBackToAdmin('1')">📤 إرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
             <button id="adminFinalPrintBtn1" class="btn btn-print" style="font-size: 12pt; padding: 10px 20px; display: none;" onclick="window.print()">🖨️ اعتماد وطباعة النموذج النهائي</button>
@@ -791,7 +790,6 @@
             إعداد وتصميم مساعد إداري خالد شاقي الرويلي
         </div>
 
-        <!-- أزرار الإجراءات للنموذج الثاني -->
         <div style="text-align: center; margin-top: 15px;" class="no-print">
             <button id="teacherActionBtn2" class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px; display: none;" onclick="sendBackToAdmin('2')">📤 إرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
             <button id="adminFinalPrintBtn2" class="btn btn-print" style="font-size: 12pt; padding: 10px 20px; display: none;" onclick="window.print()">🖨️ اعتماد وطباعة النموذج النهائي</button>
@@ -849,21 +847,22 @@
     let modalCanvasCtx = null;
     let isDrawingModal = false;
     let currentActiveModel = 'model1';
-    let userRole = 'admin'; // admin أو teacher أو final_admin
+    let userRole = 'admin';
 
-    function urlSafeEncode(str) {
-        return btoa(unescape(encodeURIComponent(str)))
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
+    // استخدام ضغط النص وتشفير خفيف مختصر جداً
+    function shortEncode(obj) {
+        try {
+            const str = JSON.stringify(obj);
+            return btoa(unescape(encodeURIComponent(str))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+        } catch(e) { return ''; }
     }
 
-    function urlSafeDecode(str) {
-        let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-        while (base64.length % 4) {
-            base64 += '=';
-        }
-        return decodeURIComponent(escape(atob(base64)));
+    function shortDecode(encoded) {
+        try {
+            let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+            while (base64.length % 4) base64 += '=';
+            return JSON.parse(decodeURIComponent(escape(atob(base64))));
+        } catch(e) { return null; }
     }
 
     window.onload = function() {
@@ -898,18 +897,15 @@
 
     function checkUrlParameters() {
         const urlParams = new URLSearchParams(window.location.search);
-        const encodedData = urlParams.get('data');
+        const encodedData = urlParams.get('d'); // تم استخدام حرف واحد 'd' لاختصار الرابط تماماً
 
         if (encodedData) {
-            try {
-                const jsonString = urlSafeDecode(encodedData);
-                const p = JSON.parse(jsonString);
-
+            const p = shortDecode(encodedData);
+            if (p) {
                 currentActiveModel = p.m || 'model1';
                 switchModel(currentActiveModel);
 
-                if (p.role === 'teacher_done') {
-                    // المرحلة الرابعة: رجعت للمدير بعد تعبئة المعلم
+                if (p.r === 'done') {
                     userRole = 'final_admin';
                     document.getElementById('adminControlPanel').style.display = 'none';
                     document.getElementById('systemBanner').style.display = 'block';
@@ -921,7 +917,6 @@
                         document.getElementById('adminFinalPrintBtn2').style.display = 'inline-block';
                     }
                 } else {
-                    // المرحلة الثانية: وصلت للمعلم للتعبئة
                     userRole = 'teacher';
                     document.getElementById('adminControlPanel').style.display = 'none';
                     document.getElementById('systemBanner').style.display = 'block';
@@ -934,7 +929,6 @@
                     }
                 }
 
-                // تعبئة البيانات المشتركة
                 if (p.m === 'model1') {
                     document.getElementById('m1_name_select').value = p.s;
                     updateStaffDetails(p.s);
@@ -956,8 +950,8 @@
                         document.getElementById('img_sigManager1').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
                     }
 
-                    if (p.role === 'teacher_done') {
-                        document.getElementById('m1_excuse').value = p.excuse || '';
+                    if (p.r === 'done') {
+                        document.getElementById('m1_excuse').value = p.exc || '';
                         if(p.tSig) {
                             document.getElementById('img_sigStaff1').src = p.tSig;
                             document.getElementById('img_sigStaff1').style.display = 'block';
@@ -993,8 +987,8 @@
                         document.getElementById('img_sigDirector2').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
                     }
 
-                    if (p.role === 'teacher_done') {
-                        document.getElementById('m2_excuse').value = p.excuse || '';
+                    if (p.r === 'done') {
+                        document.getElementById('m2_excuse').value = p.exc || '';
                         if(p.tSig) {
                             document.getElementById('img_sigStaff2').src = p.tSig;
                             document.getElementById('img_sigStaff2').style.display = 'block';
@@ -1004,27 +998,17 @@
                 }
 
                 applyPermissions();
-
-            } catch(e) {
-                console.error("خطأ في قراءة البيانات:", e);
             }
         }
     }
 
-    // تطبيق صلاحيات القفل والفتح حسب دور المستخدم
     function applyPermissions() {
         const inputs = document.querySelectorAll('input, select, textarea');
         inputs.forEach(inp => {
             if (userRole === 'teacher') {
-                // المعلم يفتح فقط خانة الإفادة وتاريخها
-                if (!inp.id.includes('excuse')) {
-                    inp.disabled = true;
-                }
+                if (!inp.id.includes('excuse')) inp.disabled = true;
             } else if (userRole === 'final_admin') {
-                // المدير في المرحلة الأخيرة يفتح فقط قرارات المدير وتاريخه
-                if (!inp.id.includes('opinion') && !inp.id.includes('dir_date')) {
-                    inp.disabled = true;
-                }
+                if (!inp.id.includes('opinion') && !inp.id.includes('dir_date')) inp.disabled = true;
             }
         });
     }
@@ -1065,7 +1049,7 @@
         document.querySelectorAll('.target-staff-name').forEach(el => el.innerText = person.name);
     }
 
-    // المدير يرسل الرابط للمعلم
+    // إرسال رابط قصير للمعلم
     function sendWhatsAppToTeacher() {
         const phone = document.getElementById('ctrl_phone').value;
         const idx = document.getElementById('staffSelect').value;
@@ -1078,7 +1062,7 @@
         let payload = {
             m: currentActiveModel,
             s: idx,
-            role: 'teacher_pending'
+            r: 'pending'
         };
 
         if (currentActiveModel === 'model1') {
@@ -1116,15 +1100,15 @@
             payload.mSig = document.getElementById('img_sigDirector2').src || '';
         }
 
-        const encodedData = urlSafeEncode(JSON.stringify(payload));
+        const encodedData = shortEncode(payload);
         const baseUrl = window.location.href.split('?')[0];
-        const directUrl = `${baseUrl}?data=${encodedData}`;
+        const shortUrl = `${baseUrl}?d=${encodedData}`;
 
-        const msg = `المكرم المعلم/الموظف: ${name} المحترم،\nالسلام عليكم ورحمة الله وبركاته..\nنأمل الاطلاع على تفاصيل المساءلة وتعبئة الإفادة والتوقيع عبر الرابط الآمن:\n${directUrl}`;
+        const msg = `المكرم المعلم/الموظف: ${name} المحترم،\nالسلام عليكم ورحمة الله وبركاته..\nنأمل تعبئة الإفادة والتوقيع عبر الرابط:\n${shortUrl}`;
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    // المعلم يرسل النموذج مكتوباً وملقحاً بالبيانات والإفادة للمدير
+    // إرجاع النموذج للمدير برابط قصير ونظيف
     function sendBackToAdmin(modelNum) {
         const excuseText = modelNum === '1' ? document.getElementById('m1_excuse').value : document.getElementById('m2_excuse').value;
         const staffSig = modelNum === '1' ? document.getElementById('img_sigStaff1').src : document.getElementById('img_sigStaff2').src;
@@ -1138,25 +1122,18 @@
             return;
         }
 
-        // جلب البيانات الأصلية الحالية وتحديثها بدور (teacher_done) مع إضافة الإفادة وتوقيع المعلم
         const urlParams = new URLSearchParams(window.location.search);
-        let payload = {};
-        try {
-            payload = JSON.parse(urlSafeDecode(urlParams.get('data')));
-        } catch(e) {
-            alert('حدث خطأ في استرجاع البيانات الأساسية.');
-            return;
-        }
+        let payload = shortDecode(urlParams.get('d')) || {};
 
-        payload.role = 'teacher_done';
-        payload.excuse = excuseText;
+        payload.r = 'done';
+        payload.exc = excuseText;
         payload.tSig = staffSig;
 
-        const encodedData = urlSafeEncode(JSON.stringify(payload));
+        const encodedData = shortEncode(payload);
         const baseUrl = window.location.href.split('?')[0];
-        const returnUrl = `${baseUrl}?data=${encodedData}`;
+        const returnUrl = `${baseUrl}?d=${encodedData}`;
 
-        const adminPhone = "966553369243"; // رقم المدير
+        const adminPhone = "966553369243";
         const staffIdx = document.getElementById(modelNum === '1' ? 'm1_name_select' : 'm2_name_select').value;
         const staffName = staffList[staffIdx] ? staffList[staffIdx].name : "المعلم";
         const reportName = modelNum === '1' ? 'نموذج مساءلة غياب' : 'نموذج تنبيه معلم';
@@ -1165,7 +1142,7 @@
                     `📌 *نوع النموذج:* ${reportName}\n` +
                     `👤 *اسم المعلم:* ${staffName}\n` +
                     `💬 *نص الإفادة:* ${excuseText}\n\n` +
-                    `🔗 *انقر هنا لاعتماد النموذج والتوقيع النهائي والطباعة:* \n${returnUrl}`;
+                    `🔗 *رابط الاعتماد النهائي والطباعة:* \n${returnUrl}`;
 
         window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(msg)}`, '_blank');
         alert('تم إرسال إفادتك وتوقيعك بنجاح إلى مدير المدرسة!');
