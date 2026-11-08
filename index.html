@@ -849,7 +849,6 @@
     let currentActiveModel = 'model1';
     let userRole = 'admin';
 
-    // استخدام ضغط النص وتشفير خفيف مختصر جداً
     function shortEncode(obj) {
         try {
             const str = JSON.stringify(obj);
@@ -897,7 +896,7 @@
 
     function checkUrlParameters() {
         const urlParams = new URLSearchParams(window.location.search);
-        const encodedData = urlParams.get('d'); // تم استخدام حرف واحد 'd' لاختصار الرابط تماماً
+        const encodedData = urlParams.get('d');
 
         if (encodedData) {
             const p = shortDecode(encodedData);
@@ -1049,7 +1048,6 @@
         document.querySelectorAll('.target-staff-name').forEach(el => el.innerText = person.name);
     }
 
-    // إرسال رابط قصير للمعلم
     function sendWhatsAppToTeacher() {
         const phone = document.getElementById('ctrl_phone').value;
         const idx = document.getElementById('staffSelect').value;
@@ -1108,7 +1106,6 @@
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    // إرجاع النموذج للمدير برابط قصير ونظيف
     function sendBackToAdmin(modelNum) {
         const excuseText = modelNum === '1' ? document.getElementById('m1_excuse').value : document.getElementById('m2_excuse').value;
         const staffSig = modelNum === '1' ? document.getElementById('img_sigStaff1').src : document.getElementById('img_sigStaff2').src;
