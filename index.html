@@ -413,7 +413,7 @@
 <body>
 
 <div id="teacherBanner" class="teacher-alert-banner" style="display: none;">
-    📌 أهلاً بك، يرجى كتابة إفادتك وتوقيعك في الأسفل ثم النقر على زر "حفظ وإرسال الإفادة للمدير".
+    📌 المكرم المعلم/الموظف: يرجى كتابة إفادتك وتوقيعك في القسم المخصص بالأسفل ثم النقر على زر الإرسال للمدير.
 </div>
 
 <div class="no-print" id="adminControlPanel">
@@ -442,7 +442,7 @@
     </div>
 
     <div class="form-row">
-        <button class="btn" onclick="sendWhatsApp()">📱 إرسال رابط النموذج المشفر عبر الواتساب للمعلم</button>
+        <button class="btn" onclick="sendWhatsApp()">📱 إرسال رابط النموذج المعالج عبر الواتساب للمعلم</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة النموذج (صفحة واحدة)</button>
     </div>
 </div>
@@ -559,7 +559,7 @@
         <div class="section-box">
             <div class="section-title">( 1 ) طلب الإفادة :</div>
             <p>المكرم / <strong class="target-staff-name">..................................................</strong> وفقه الله</p>
-            <p>السلام عليكم ورحمة الله وبركاته .. وبعد : من خلال متابعة الدوام تبين غيابكم ، آمل الإفادة عن أسباب ذلك وعليكم تقديم ما يؤيد عذركم خلال أسبوع من تاريخه .</p>
+            <p>السلام عليكم ورحمة الله وبركاته .. وبعد : من خلال متابعة الدوام تبين غيابكم ، آمل الإفادة عن أسباب ذلك وعليكم تقديم ما تؤيد عذركم خلال أسبوع من تاريخه .</p>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <span>اسم الرئيس المباشر : <strong>عويد عشبان الرويلي</strong></span>
                 <div>
@@ -627,7 +627,7 @@
         </div>
 
         <div class="footer-note">
-            <strong>ملاحظات هامة :</strong> 1- تستكمل الاستمارة من المدير المباشر وإصدار القرار. 2- إذا سبق عطلة نهاية الأسبوع غياب وألحقها غياب تحتسب كاملة. 3- يعطى المتغيب مدة أسبوع لتقديم ما يؤيد عذره.
+            <strong>ملاحظات هامة :</strong> 1- تستكمل الاستمارة من المدير المباشر وإصدار القرار. 2- إذا سبق عطلة نهاية الأسبوع غياب وألحقها غياب تحتسب كاملة. 3- يعطى المتغيب مدة أسبوع لتقديم ما تؤيد عذره.
         </div>
 
         <div class="designer-credit">
@@ -729,7 +729,7 @@
                 </div>
             </div>
 
-            <p>عليه نأمل توضيح أسباب ذلك مع إرفاق ما يؤيد عذركم ،،،</p>
+            <p>عليه نأمل توضيح أسباب ذلك مع إرفاق ما تؤيد عذركم ،،،</p>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <span>مدير المدرسة : <strong>عويد عشبان الرويلي</strong></span>
                 <div>
@@ -809,7 +809,7 @@
         { name: "خالد فرحان بن جيدان الرويلي", id: "1068170115", spec: "علوم", job: "معلم", phone: "966530005590" },
         { name: "خالد لهد فليحان الرويلي", id: "1057432146", spec: "دين", job: "معلم", phone: "966504863806" },
         { name: "خالد مناحي علمش الرويلي", id: "1027705712", spec: "علوم", job: "معلم", phone: "966552423534" },
-        { name: "خالد هزاع جطلي الرويلي", id: "1044949244", spec: "رياضيات", job: "966506396730" },
+        { name: "خالد هزاع جطلي الرويلي", id: "1044949244", spec: "رياضيات", job: "معلم", phone: "966506396730" },
         { name: "راضي هليل جابر الرويلي", id: "1027779931", spec: "علوم", job: "معلم", phone: "966503393612" },
         { name: "رائد خليف جهيم الرويلي", id: "1065813147", spec: "عربي", job: "معلم", phone: "966556241146" },
         { name: "سعود غازي خليف الرويلي", id: "1032744888", spec: "دين", job: "معلم", phone: "966533308868" },
@@ -851,6 +851,22 @@
     let currentActiveModel = 'model1';
     let isTeacherMode = false;
 
+    // دالتين للترميز الآمن للروابط لمنع تكسر رابط الواتساب
+    function urlSafeEncode(str) {
+        return btoa(unescape(encodeURIComponent(str)))
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+    }
+
+    function urlSafeDecode(str) {
+        let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4) {
+            base64 += '=';
+        }
+        return decodeURIComponent(escape(atob(base64)));
+    }
+
     window.onload = function() {
         const ctrlSel = document.getElementById('staffSelect');
         const m1Sel = document.getElementById('m1_name_select');
@@ -881,22 +897,19 @@
         checkEncryptedUrlData();
     };
 
-    // فك تشفير وفحص البيانات القادمة عبر الرابط للمعلم
     function checkEncryptedUrlData() {
         const urlParams = new URLSearchParams(window.location.search);
         const encodedData = urlParams.get('data');
 
         if (encodedData) {
             try {
-                // فك التشفير (Base64 decode + JSON parse)
-                const jsonString = decodeURIComponent(escape(window.atob(encodedData)));
+                const jsonString = urlSafeDecode(encodedData);
                 const payload = JSON.parse(jsonString);
 
                 isTeacherMode = true;
-                currentActiveModel = payload.model || 'model1';
+                currentActiveModel = payload.m || 'model1';
                 switchModel(currentActiveModel);
 
-                // إخفاء لوحة المدير والتحكم وإظهار تنبيه المعلم وزر الحفظ
                 document.getElementById('adminControlPanel').style.display = 'none';
                 document.getElementById('teacherBanner').style.display = 'block';
 
@@ -906,77 +919,59 @@
                     document.getElementById('teacherSendContainer2').style.display = 'block';
                 }
 
-                // تعبئة البيانات الواردة من المدير
-                if (payload.model === 'model1') {
-                    document.getElementById('m1_name_select').value = payload.staffIdx;
-                    updateStaffDetails(payload.staffIdx);
-                    document.getElementById('m1_doc_no').value = payload.docNo || '';
-                    document.getElementById('m1_header_date').value = payload.headerDate || '';
-                    document.getElementById('m1_attachments').value = payload.attachments || '0';
-                    document.getElementById('m1_level').value = payload.level || '';
-                    document.getElementById('m1_degree').value = payload.degree || '';
-                    document.getElementById('m1_job_num').value = payload.jobNum || '';
-                    document.getElementById('m1_days_count').value = payload.daysCount || '';
-                    document.getElementById('m1_from_day').value = payload.fromDay || '';
-                    document.getElementById('m1_from_date').value = payload.fromDate || '';
-                    document.getElementById('m1_to_day').value = payload.toDay || '';
-                    document.getElementById('m1_to_date').value = payload.toDate || '';
-
-                    if (payload.managerSig) {
-                        document.getElementById('img_sigManager1').src = payload.managerSig;
-                        document.getElementById('img_sigManager1').style.display = 'block';
-                        document.getElementById('img_sigManager1').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
-                    }
+                if (payload.m === 'model1') {
+                    document.getElementById('m1_name_select').value = payload.s;
+                    updateStaffDetails(payload.s);
+                    document.getElementById('m1_doc_no').value = payload.dn || '';
+                    document.getElementById('m1_header_date').value = payload.hd || '';
+                    document.getElementById('m1_attachments').value = payload.at || '0';
+                    document.getElementById('m1_level').value = payload.lv || '';
+                    document.getElementById('m1_degree').value = payload.dg || '';
+                    document.getElementById('m1_job_num').value = payload.jn || '';
+                    document.getElementById('m1_days_count').value = payload.dc || '';
+                    document.getElementById('m1_from_day').value = payload.fd || '';
+                    document.getElementById('m1_from_date').value = payload.fdt || '';
+                    document.getElementById('m1_to_day').value = payload.td || '';
+                    document.getElementById('m1_to_date').value = payload.tdt || '';
                 } else {
-                    document.getElementById('m2_name_select').value = payload.staffIdx;
-                    updateStaffDetails(payload.staffIdx);
-                    document.getElementById('m2_doc_no').value = payload.docNo || '';
-                    document.getElementById('m2_header_date').value = payload.headerDate || '';
-                    document.getElementById('m2_level').value = payload.level || '';
-                    document.getElementById('m2_job_num').value = payload.jobNum || '';
-                    document.getElementById('m2_incident_day').value = payload.incidentDay || '';
-                    document.getElementById('m2_incident_date').value = payload.incidentDate || '';
+                    document.getElementById('m2_name_select').value = payload.s;
+                    updateStaffDetails(payload.s);
+                    document.getElementById('m2_doc_no').value = payload.dn || '';
+                    document.getElementById('m2_header_date').value = payload.hd || '';
+                    document.getElementById('m2_level').value = payload.lv || '';
+                    document.getElementById('m2_job_num').value = payload.jn || '';
+                    document.getElementById('m2_incident_day').value = payload.id || '';
+                    document.getElementById('m2_incident_date').value = payload.idt || '';
                     
-                    // مربعات الاختيار
-                    if(payload.chk1) document.getElementById('m2_chk_1').value = '✔';
-                    document.getElementById('m2_val_1').value = payload.val1 || '';
-                    if(payload.chk2) document.getElementById('m2_chk_2').value = '✔';
-                    document.getElementById('m2_val_2a').value = payload.val2a || '';
-                    document.getElementById('m2_val_2b').value = payload.val2b || '';
-                    if(payload.chk3) document.getElementById('m2_chk_3').value = '✔';
-                    document.getElementById('m2_val_3').value = payload.val3 || '';
-                    if(payload.chk4) document.getElementById('m2_chk_4').value = '✔';
-                    document.getElementById('m2_val_4a').value = payload.val4a || '';
-                    document.getElementById('m2_val_4b').value = payload.val4b || '';
-                    if(payload.chk5) document.getElementById('m2_chk_5').value = '✔';
-                    document.getElementById('m2_val_5').value = payload.val5 || '';
-
-                    if (payload.managerSig) {
-                        document.getElementById('img_sigDirector2').src = payload.managerSig;
-                        document.getElementById('img_sigDirector2').style.display = 'block';
-                        document.getElementById('img_sigDirector2').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
-                    }
+                    if(payload.c1) document.getElementById('m2_chk_1').value = '✔';
+                    document.getElementById('m2_val_1').value = payload.v1 || '';
+                    if(payload.c2) document.getElementById('m2_chk_2').value = '✔';
+                    document.getElementById('m2_val_2a').value = payload.v2a || '';
+                    document.getElementById('m2_val_2b').value = payload.v2b || '';
+                    if(payload.c3) document.getElementById('m2_chk_3').value = '✔';
+                    document.getElementById('m2_val_3').value = payload.v3 || '';
+                    if(payload.c4) document.getElementById('m2_chk_4').value = '✔';
+                    document.getElementById('m2_val_4a').value = payload.v4a || '';
+                    document.getElementById('m2_val_4b').value = payload.v4b || '';
+                    if(payload.c5) document.getElementById('m2_chk_5').value = '✔';
+                    document.getElementById('m2_val_5').value = payload.v5 || '';
                 }
 
-                // قفل كافة حقول المدير والجدول لكي لا يعدلها المعلم
                 lockAdminFields();
 
             } catch(e) {
                 console.error("خطأ في فك تشفير البيانات:", e);
-                alert("رابط النموذج غير صالح أو تالف.");
             }
         }
     }
 
     function lockAdminFields() {
-        // تعطيل حقول الإدخال والسيليكت الخاصة بالمدير
         const inputs = document.querySelectorAll('input, select, textarea');
         inputs.forEach(inp => {
             if (!inp.id.includes('excuse') && !inp.id.includes('Staff')) {
                 inp.disabled = true;
             }
         });
-        // إخفاء أزرار حذف التوقيع الخاصة بالمدير
         document.querySelectorAll('.admin-only').forEach(btn => btn.style.display = 'none');
     }
 
@@ -989,8 +984,8 @@
     }
 
     function syncName(sel) {
+        if(isTeacherMode) return;
         const idx = sel.value;
-        if(isTeacherMode) return; // المعلم لا يغير الاسم
         document.getElementById('staffSelect').value = idx;
         document.getElementById('m1_name_select').value = idx;
         document.getElementById('m2_name_select').value = idx;
@@ -1016,7 +1011,6 @@
         document.querySelectorAll('.target-staff-name').forEach(el => el.innerText = person.name);
     }
 
-    // إرسال الرابط المشفر من المدير للمعلم عبر الواتساب
     function sendWhatsApp() {
         const phone = document.getElementById('ctrl_phone').value;
         const idx = document.getElementById('staffSelect').value;
@@ -1027,49 +1021,46 @@
 
         const name = staffList[idx].name;
         let payload = {
-            model: currentActiveModel,
-            staffIdx: idx,
+            m: currentActiveModel,
+            s: idx
         };
 
         if (currentActiveModel === 'model1') {
-            payload.docNo = document.getElementById('m1_doc_no').value;
-            payload.headerDate = document.getElementById('m1_header_date').value;
-            payload.attachments = document.getElementById('m1_attachments').value;
-            payload.level = document.getElementById('m1_level').value;
-            payload.degree = document.getElementById('m1_degree').value;
-            payload.jobNum = document.getElementById('m1_job_num').value;
-            payload.daysCount = document.getElementById('m1_days_count').value;
-            payload.fromDay = document.getElementById('m1_from_day').value;
-            payload.fromDate = document.getElementById('m1_from_date').value;
-            payload.toDay = document.getElementById('m1_to_day').value;
-            payload.toDate = document.getElementById('m1_to_date').value;
-            payload.managerSig = document.getElementById('img_sigManager1').src || '';
+            payload.dn = document.getElementById('m1_doc_no').value;
+            payload.hd = document.getElementById('m1_header_date').value;
+            payload.at = document.getElementById('m1_attachments').value;
+            payload.lv = document.getElementById('m1_level').value;
+            payload.dg = document.getElementById('m1_degree').value;
+            payload.jn = document.getElementById('m1_job_num').value;
+            payload.dc = document.getElementById('m1_days_count').value;
+            payload.fd = document.getElementById('m1_from_day').value;
+            payload.fdt = document.getElementById('m1_from_date').value;
+            payload.td = document.getElementById('m1_to_day').value;
+            payload.tdt = document.getElementById('m1_to_date').value;
         } else {
-            payload.docNo = document.getElementById('m2_doc_no').value;
-            payload.headerDate = document.getElementById('m2_header_date').value;
-            payload.level = document.getElementById('m2_level').value;
-            payload.jobNum = document.getElementById('m2_job_num').value;
-            payload.incidentDay = document.getElementById('m2_incident_day').value;
-            payload.incidentDate = document.getElementById('m2_incident_date').value;
+            payload.dn = document.getElementById('m2_doc_no').value;
+            payload.hd = document.getElementById('m2_header_date').value;
+            payload.lv = document.getElementById('m2_level').value;
+            payload.jn = document.getElementById('m2_job_num').value;
+            payload.id = document.getElementById('m2_incident_day').value;
+            payload.idt = document.getElementById('m2_incident_date').value;
             
-            payload.chk1 = document.getElementById('m2_chk_1').value === '✔';
-            payload.val1 = document.getElementById('m2_val_1').value;
-            payload.chk2 = document.getElementById('m2_chk_2').value === '✔';
-            payload.val2a = document.getElementById('m2_val_2a').value;
-            payload.val2b = document.getElementById('m2_val_2b').value;
-            payload.chk3 = document.getElementById('m2_chk_3').value === '✔';
-            payload.val3 = document.getElementById('m2_val_3').value;
-            payload.chk4 = document.getElementById('m2_chk_4').value === '✔';
-            payload.val4a = document.getElementById('m2_val_4a').value;
-            payload.val4b = document.getElementById('m2_val_4b').value;
-            payload.chk5 = document.getElementById('m2_chk_5').value === '✔';
-            payload.val5 = document.getElementById('m2_val_5').value;
-            payload.managerSig = document.getElementById('img_sigDirector2').src || '';
+            payload.c1 = document.getElementById('m2_chk_1').value === '✔' ? 1 : 0;
+            payload.v1 = document.getElementById('m2_val_1').value;
+            payload.c2 = document.getElementById('m2_chk_2').value === '✔' ? 1 : 0;
+            payload.v2a = document.getElementById('m2_val_2a').value;
+            payload.v2b = document.getElementById('m2_val_2b').value;
+            payload.c3 = document.getElementById('m2_chk_3').value === '✔' ? 1 : 0;
+            payload.v3 = document.getElementById('m2_val_3').value;
+            payload.c4 = document.getElementById('m2_chk_4').value === '✔' ? 1 : 0;
+            payload.v4a = document.getElementById('m2_val_4a').value;
+            payload.v4b = document.getElementById('m2_val_4b').value;
+            payload.c5 = document.getElementById('m2_chk_5').value === '✔' ? 1 : 0;
+            payload.v5 = document.getElementById('m2_val_5').value;
         }
 
-        // تشفير الحزمة برمجياً (Base64)
         const jsonString = JSON.stringify(payload);
-        const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
+        const encodedData = urlSafeEncode(jsonString);
 
         const baseUrl = window.location.href.split('?')[0];
         const directUrl = `${baseUrl}?data=${encodedData}`;
@@ -1078,7 +1069,6 @@
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
     }
 
-    // إرسال الإفادة والتوقيع من المعلم للمدير عبر الواتساب
     function teacherSendBack(modelNum) {
         const excuseText = modelNum === '1' ? document.getElementById('m1_excuse').value : document.getElementById('m2_excuse').value;
         const staffSig = modelNum === '1' ? document.getElementById('img_sigStaff1').src : document.getElementById('img_sigStaff2').src;
@@ -1094,17 +1084,16 @@
             return;
         }
 
-        // تجهيز رسالة التقرير لإرسالها للمدير
-        const adminPhone = "966500000000"; // رقم مدير المدرسة الافتراضي أو يتم ضبطه
+        const adminPhone = "966553369243";
         let reportMsg = `📋 *إفادة معلم معتمدة وموقعة*%0A`;
-        reportName = modelNum === '1' ? 'نموذج مساءلة غياب' : 'نموذج تنبيه معلم';
+        const reportName = modelNum === '1' ? 'نموذج مساءلة غياب' : 'نموذج تنبيه معلم';
         reportMsg += `📌 *نوع النموذج:* ${reportName}%0A`;
         reportMsg += `👤 *اسم المعلم:* ${staffName}%0A`;
         reportMsg += `💬 *نص الإفادة:* ${excuseText}%0A`;
-        reportMsg += `✍️ *الحالة:* تم توقيع الإفادة إلكترونياً من قبل المعلم وجاهزة لاعتماد مدير المدرسة.`;
+        reportMsg += `✍️ *الحالة:* تم توقيع الإفادة إلكترونياً وهي جاهزة للاعتماد.`;
 
         window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(reportMsg)}`, '_blank');
-        alert('تم حفظ الإفادة وتوقيعك بنجاح، وتوجيهها لمدير المدرسة عبر الواتساب!');
+        alert('تم حفظ الإفادة وتوقيعك بنجاح، وتوجيهها للمدير!');
     }
 
     function switchModel(m) {
@@ -1116,9 +1105,7 @@
         if (activeTab) activeTab.classList.add('active');
     }
 
-    /* إدارة النافذة المنبثقة للتواقيع */
     function openSigModal(targetId) {
-        // إذا كان المعلم في وضع الإفادة، نسمح له بالتوقيع في خانة المعلم فقط
         if (isTeacherMode && !targetId.includes('Staff')) {
             alert('عذراً، هذا الحقل خاص بتوقيع الإدارة ولا يمكن تعديله.');
             return;
@@ -1175,7 +1162,6 @@
         modalCanvasCtx.clearRect(0, 0, cvs.width, cvs.height);
     }
 
-    /* إدارة التواقيع المحفوظة */
     function getStoredSignatures() {
         try {
             return JSON.parse(localStorage.getItem('my_school_signatures') || '[]');
