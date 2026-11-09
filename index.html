@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة المساءلات الرسمية - مدرسة عبدالله بن مسعود الابتدائية</title>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @page {
             size: A4 portrait;
@@ -442,7 +444,7 @@
     </div>
 
     <div class="form-row">
-        <button class="btn" onclick="sendWhatsAppToTeacher()">📱 إرسال رابط النموذج القصير للمعلم</button>
+        <button class="btn" onclick="createAndSendDispute()">📱 إرسال رابط النموذج القصير للمعلم</button>
         <button class="btn btn-print" onclick="window.print()">🖨️ طباعة النموذج (صفحة واحدة)</button>
     </div>
 </div>
@@ -633,7 +635,7 @@
         </div>
 
         <div style="text-align: center; margin-top: 15px;" class="no-print">
-            <button id="teacherActionBtn1" class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px; display: none;" onclick="sendBackToAdmin('1')">📤 إرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
+            <button id="teacherActionBtn1" class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px; display: none;" onclick="submitTeacherResponse('1')">📤 إرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
             <button id="adminFinalPrintBtn1" class="btn btn-print" style="font-size: 12pt; padding: 10px 20px; display: none;" onclick="window.print()">🖨️ اعتماد وطباعة النموذج النهائي</button>
         </div>
     </div>
@@ -791,13 +793,18 @@
         </div>
 
         <div style="text-align: center; margin-top: 15px;" class="no-print">
-            <button id="teacherActionBtn2" class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px; display: none;" onclick="sendBackToAdmin('2')">📤 إرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
+            <button id="teacherActionBtn2" class="btn" style="background-color: #065F46; font-size: 12pt; padding: 10px 20px; display: none;" onclick="submitTeacherResponse('2')">📤 إرسال الإفادة والتوقيع للمدير عبر الواتساب</button>
             <button id="adminFinalPrintBtn2" class="btn btn-print" style="font-size: 12pt; padding: 10px 20px; display: none;" onclick="window.print()">🖨️ اعتماد وطباعة النموذج النهائي</button>
         </div>
     </div>
 </div>
 
 <script>
+    // إعدادات اتصال Supabase بالمشروع السابق
+    const SUPABASE_URL = 'https://dfraanyolhzqqypkkcbn.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_lP0Hcv0OKe2PWnksDigP2Q_KaWxmfCV';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const staffList = [
         { name: "أحمد بن ختام شايز الرويلي", id: "1048337156", spec: "عربي", job: "معلم", phone: "966501930755" },
         { name: "بدر خليف قياض الرويلي", id: "1043307998", spec: "دين", job: "معلم", phone: "966569649478" },
@@ -805,7 +812,7 @@
         { name: "حمدان تاجر حمدان الرويلي", id: "1013576317", spec: "علوم", job: "معلم", phone: "966503030096" },
         { name: "حمود بن باقي بن ميادي الرويلي", id: "1029814678", spec: "رياضيات", job: "معلم", phone: "966503390781" },
         { name: "خالد فرحان بن جيدان الرويلي", id: "1068170115", spec: "علوم", job: "معلم", phone: "966530005590" },
-        { name: "خالد لهد فليحان الرويلي", id: "1057432146", spec: "دين", job: "معلم", phone: "966504863806" },
+        { name: "خالد لهد فليحان الرويلي", id: "1057432146", spec: "دين", job: "966504863806" },
         { name: "خالد مناحي علمش الرويلي", id: "1027705712", spec: "علوم", job: "معلم", phone: "966552423534" },
         { name: "خالد هزاع جطلي الرويلي", id: "1044949244", spec: "رياضيات", job: "معلم", phone: "966506396730" },
         { name: "راضي هليل جابر الرويلي", id: "1027779931", spec: "علوم", job: "معلم", phone: "966503393612" },
@@ -849,21 +856,6 @@
     let currentActiveModel = 'model1';
     let userRole = 'admin';
 
-    function shortEncode(obj) {
-        try {
-            const str = JSON.stringify(obj);
-            return btoa(unescape(encodeURIComponent(str))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-        } catch(e) { return ''; }
-    }
-
-    function shortDecode(encoded) {
-        try {
-            let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
-            while (base64.length % 4) base64 += '=';
-            return JSON.parse(decodeURIComponent(escape(atob(base64))));
-        } catch(e) { return null; }
-    }
-
     window.onload = function() {
         const ctrlSel = document.getElementById('staffSelect');
         const m1Sel = document.getElementById('m1_name_select');
@@ -894,17 +886,22 @@
         checkUrlParameters();
     };
 
-    function checkUrlParameters() {
+    async function checkUrlParameters() {
         const urlParams = new URLSearchParams(window.location.search);
-        const encodedData = urlParams.get('d');
+        const token = urlParams.get('token');
 
-        if (encodedData) {
-            const p = shortDecode(encodedData);
-            if (p) {
-                currentActiveModel = p.m || 'model1';
+        if (token) {
+            const { data, error } = await supabaseClient
+                .from('disputes')
+                .select('*')
+                .eq('token', token)
+                .single();
+
+            if (data && !error) {
+                currentActiveModel = data.model_type || 'model1';
                 switchModel(currentActiveModel);
 
-                if (p.r === 'done') {
+                if (data.status === 'pending_admin') {
                     userRole = 'final_admin';
                     document.getElementById('adminControlPanel').style.display = 'none';
                     document.getElementById('systemBanner').style.display = 'block';
@@ -928,68 +925,75 @@
                     }
                 }
 
-                if (p.m === 'model1') {
-                    document.getElementById('m1_name_select').value = p.s;
-                    updateStaffDetails(p.s);
-                    document.getElementById('m1_doc_no').value = p.dn || '';
-                    document.getElementById('m1_header_date').value = p.hd || '';
-                    document.getElementById('m1_attachments').value = p.at || '0';
-                    document.getElementById('m1_level').value = p.lv || '';
-                    document.getElementById('m1_degree').value = p.dg || '';
-                    document.getElementById('m1_job_num').value = p.jn || '';
-                    document.getElementById('m1_days_count').value = p.dc || '';
-                    document.getElementById('m1_from_day').value = p.fd || '';
-                    document.getElementById('m1_from_date').value = p.fdt || '';
-                    document.getElementById('m1_to_day').value = p.td || '';
-                    document.getElementById('m1_to_date').value = p.tdt || '';
+                // تعبئة البيانات من قاعدة البيانات
+                // البحث عن المعلم بالاسم أو السجل لتعبئة الحقول
+                let staffIdx = staffList.findIndex(s => s.id === data.staff_id);
+                if (staffIdx !== -1) {
+                    document.getElementById('staffSelect').value = staffIdx;
+                    document.getElementById('m1_name_select').value = staffIdx;
+                    document.getElementById('m2_name_select').value = staffIdx;
+                    updateStaffDetails(staffIdx);
+                }
 
-                    if(p.mSig) {
-                        document.getElementById('img_sigManager1').src = p.mSig;
+                if (currentActiveModel === 'model1') {
+                    document.getElementById('m1_doc_no').value = data.doc_no || '';
+                    document.getElementById('m1_header_date').value = data.header_date || '';
+                    document.getElementById('m1_attachments').value = data.attachments || '0';
+                    document.getElementById('m1_level').value = data.level || '';
+                    document.getElementById('m1_degree').value = data.degree || '';
+                    document.getElementById('m1_job_num').value = data.job_num || '';
+                    document.getElementById('m1_days_count').value = data.days_count || '';
+                    document.getElementById('m1_from_day').value = data.from_day || '';
+                    document.getElementById('m1_from_date').value = data.from_date || '';
+                    document.getElementById('m1_to_day').value = data.to_day || '';
+                    document.getElementById('m1_to_date').value = data.to_date || '';
+
+                    if(data.manager_sig) {
+                        document.getElementById('img_sigManager1').src = data.manager_sig;
                         document.getElementById('img_sigManager1').style.display = 'block';
                         document.getElementById('img_sigManager1').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
                     }
 
-                    if (p.r === 'done') {
-                        document.getElementById('m1_excuse').value = p.exc || '';
-                        if(p.tSig) {
-                            document.getElementById('img_sigStaff1').src = p.tSig;
+                    if (data.status === 'pending_admin') {
+                        document.getElementById('m1_excuse').value = data.teacher_excuse || '';
+                        if(data.teacher_sig) {
+                            document.getElementById('img_sigStaff1').src = data.teacher_sig;
                             document.getElementById('img_sigStaff1').style.display = 'block';
                             document.getElementById('img_sigStaff1').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
                         }
                     }
                 } else {
-                    document.getElementById('m2_name_select').value = p.s;
-                    updateStaffDetails(p.s);
-                    document.getElementById('m2_doc_no').value = p.dn || '';
-                    document.getElementById('m2_header_date').value = p.hd || '';
-                    document.getElementById('m2_level').value = p.lv || '';
-                    document.getElementById('m2_job_num').value = p.jn || '';
-                    document.getElementById('m2_incident_day').value = p.id || '';
-                    document.getElementById('m2_incident_date').value = p.idt || '';
+                    document.getElementById('m2_doc_no').value = data.doc_no || '';
+                    document.getElementById('m2_header_date').value = data.header_date || '';
+                    document.getElementById('m2_level').value = data.level || '';
+                    document.getElementById('m2_job_num').value = data.job_num || '';
+                    document.getElementById('m2_incident_day').value = data.incident_day || '';
+                    document.getElementById('m2_incident_date').value = data.incident_date || '';
                     
-                    if(p.c1) document.getElementById('m2_chk_1').value = '✔';
-                    document.getElementById('m2_val_1').value = p.v1 || '';
-                    if(p.c2) document.getElementById('m2_chk_2').value = '✔';
-                    document.getElementById('m2_val_2a').value = p.v2a || '';
-                    document.getElementById('m2_val_2b').value = p.v2b || '';
-                    if(p.c3) document.getElementById('m2_chk_3').value = '✔';
-                    document.getElementById('m2_val_3').value = p.v3 || '';
-                    if(p.c4) document.getElementById('m2_chk_4').value = '✔';
-                    document.getElementById('m2_val_4a').value = p.v4a || '';
-                    document.getElementById('m2_val_4b').value = p.v4b || '';
-                    if(p.c5) document.getElementById('m2_chk_5').value = '✔';
-                    document.getElementById('m2_val_5').value = p.v5 || '';
+                    let det = data.incident_details || {};
+                    if(det.c1) document.getElementById('m2_chk_1').value = '✔';
+                    document.getElementById('m2_val_1').value = det.v1 || '';
+                    if(det.c2) document.getElementById('m2_chk_2').value = '✔';
+                    document.getElementById('m2_val_2a').value = det.v2a || '';
+                    document.getElementById('m2_val_2b').value = det.v2b || '';
+                    if(det.c3) document.getElementById('m2_chk_3').value = '✔';
+                    document.getElementById('m2_val_3').value = det.v3 || '';
+                    if(det.c4) document.getElementById('m2_chk_4').value = '✔';
+                    document.getElementById('m2_val_4a').value = det.v4a || '';
+                    document.getElementById('m2_val_4b').value = det.v4b || '';
+                    if(det.c5) document.getElementById('m2_chk_5').value = '✔';
+                    document.getElementById('m2_val_5').value = det.v5 || '';
 
-                    if(p.mSig) {
-                        document.getElementById('img_sigDirector2').src = p.mSig;
+                    if(data.manager_sig) {
+                        document.getElementById('img_sigDirector2').src = data.manager_sig;
                         document.getElementById('img_sigDirector2').style.display = 'block';
                         document.getElementById('img_sigDirector2').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
                     }
 
-                    if (p.r === 'done') {
-                        document.getElementById('m2_excuse').value = p.exc || '';
-                        if(p.tSig) {
-                            document.getElementById('img_sigStaff2').src = p.tSig;
+                    if (data.status === 'pending_admin') {
+                        document.getElementById('m2_excuse').value = data.teacher_excuse || '';
+                        if(data.teacher_sig) {
+                            document.getElementById('img_sigStaff2').src = data.teacher_sig;
                             document.getElementById('img_sigStaff2').style.display = 'block';
                             document.getElementById('img_sigStaff2').parentElement.querySelector('.sig-placeholder-text').style.display = 'none';
                         }
@@ -1007,7 +1011,7 @@
             if (userRole === 'teacher') {
                 if (!inp.id.includes('excuse')) inp.disabled = true;
             } else if (userRole === 'final_admin') {
-                if (!inp.id.includes('opinion') && !inp.id.includes('dir_date')) inp.disabled = true;
+                if (!inp.id.includes('opinion') && !inp.id.includes('dir_date') && !inp.id.includes('decision')) inp.disabled = true;
             }
         });
     }
@@ -1048,7 +1052,7 @@
         document.querySelectorAll('.target-staff-name').forEach(el => el.innerText = person.name);
     }
 
-    function sendWhatsAppToTeacher() {
+    async function createAndSendDispute() {
         const phone = document.getElementById('ctrl_phone').value;
         const idx = document.getElementById('staffSelect').value;
         if (!idx || !phone) {
@@ -1056,57 +1060,77 @@
             return;
         }
 
-        const name = staffList[idx].name;
-        let payload = {
-            m: currentActiveModel,
-            s: idx,
-            r: 'pending'
+        const person = staffList[idx];
+        let record = {
+            model_type: currentActiveModel,
+            staff_name: person.name,
+            staff_id: person.id,
+            staff_phone: phone,
+            status: 'pending_teacher'
         };
 
         if (currentActiveModel === 'model1') {
-            payload.dn = document.getElementById('m1_doc_no').value;
-            payload.hd = document.getElementById('m1_header_date').value;
-            payload.at = document.getElementById('m1_attachments').value;
-            payload.lv = document.getElementById('m1_level').value;
-            payload.dg = document.getElementById('m1_degree').value;
-            payload.jn = document.getElementById('m1_job_num').value;
-            payload.dc = document.getElementById('m1_days_count').value;
-            payload.fd = document.getElementById('m1_from_day').value;
-            payload.fdt = document.getElementById('m1_from_date').value;
-            payload.td = document.getElementById('m1_to_day').value;
-            payload.tdt = document.getElementById('m1_to_date').value;
-            payload.mSig = document.getElementById('img_sigManager1').src || '';
+            record.doc_no = document.getElementById('m1_doc_no').value;
+            record.header_date = document.getElementById('m1_header_date').value;
+            record.attachments = document.getElementById('m1_attachments').value;
+            record.level = document.getElementById('m1_level').value;
+            record.degree = document.getElementById('m1_degree').value;
+            record.job_num = document.getElementById('m1_job_num').value;
+            record.days_count = document.getElementById('m1_days_count').value;
+            record.from_day = document.getElementById('m1_from_day').value;
+            record.from_date = document.getElementById('m1_from_date').value;
+            record.to_day = document.getElementById('m1_to_day').value;
+            record.to_date = document.getElementById('m1_to_date').value;
+            record.manager_sig = document.getElementById('img_sigManager1').src || '';
+            record.spec = document.getElementById('m1_spec').value;
+            record.job = document.getElementById('m1_job').value;
         } else {
-            payload.dn = document.getElementById('m2_doc_no').value;
-            payload.hd = document.getElementById('m2_header_date').value;
-            payload.lv = document.getElementById('m2_level').value;
-            payload.jn = document.getElementById('m2_job_num').value;
-            payload.id = document.getElementById('m2_incident_day').value;
-            payload.idt = document.getElementById('m2_incident_date').value;
-            payload.c1 = document.getElementById('m2_chk_1').value === '✔' ? 1 : 0;
-            payload.v1 = document.getElementById('m2_val_1').value;
-            payload.c2 = document.getElementById('m2_chk_2').value === '✔' ? 1 : 0;
-            payload.v2a = document.getElementById('m2_val_2a').value;
-            payload.v2b = document.getElementById('m2_val_2b').value;
-            payload.c3 = document.getElementById('m2_chk_3').value === '✔' ? 1 : 0;
-            payload.v3 = document.getElementById('m2_val_3').value;
-            payload.c4 = document.getElementById('m2_chk_4').value === '✔' ? 1 : 0;
-            payload.v4a = document.getElementById('m2_val_4a').value;
-            payload.v4b = document.getElementById('m2_val_4b').value;
-            payload.c5 = document.getElementById('m2_chk_5').value === '✔' ? 1 : 0;
-            payload.v5 = document.getElementById('m2_val_5').value;
-            payload.mSig = document.getElementById('img_sigDirector2').src || '';
+            record.doc_no = document.getElementById('m2_doc_no').value;
+            record.header_date = document.getElementById('m2_header_date').value;
+            record.level = document.getElementById('m2_level').value;
+            record.job_num = document.getElementById('m2_job_num').value;
+            record.incident_day = document.getElementById('m2_incident_day').value;
+            record.incident_date = document.getElementById('m2_incident_date').value;
+            record.incident_details = {
+                c1: document.getElementById('m2_chk_1').value === '✔',
+                v1: document.getElementById('m2_val_1').value,
+                c2: document.getElementById('m2_chk_2').value === '✔',
+                v2a: document.getElementById('m2_val_2a').value,
+                v2b: document.getElementById('m2_val_2b').value,
+                c3: document.getElementById('m2_chk_3').value === '✔',
+                v3: document.getElementById('m2_val_3').value,
+                c4: document.getElementById('m2_chk_4').value === '✔',
+                v4a: document.getElementById('m2_val_4a').value,
+                v4b: document.getElementById('m2_val_4b').value,
+                c5: document.getElementById('m2_chk_5').value === '✔',
+                v5: document.getElementById('m2_val_5').value
+            };
+            record.manager_sig = document.getElementById('img_sigDirector2').src || '';
+            record.spec = document.getElementById('m2_spec').value;
+            record.job = document.getElementById('m2_job').value;
         }
 
-        const encodedData = shortEncode(payload);
-        const baseUrl = window.location.href.split('?')[0];
-        const shortUrl = `${baseUrl}?d=${encodedData}`;
+        // حفظ البيانات في جدول Supabase والحصول على الرمز (Token) الفريد
+        const { data, error } = await supabaseClient
+            .from('disputes')
+            .insert([record])
+            .select()
+            .single();
 
-        const msg = `المكرم المعلم/الموظف: ${name} المحترم،\nالسلام عليكم ورحمة الله وبركاته..\nنأمل تعبئة الإفادة والتوقيع عبر الرابط:\n${shortUrl}`;
+        if (error) {
+            alert('حدث خطأ أثناء حفظ البيانات في السيرفر: ' + error.message);
+            return;
+        }
+
+        const token = data.token;
+        const baseUrl = window.location.href.split('?')[0];
+        const shortUrl = `${baseUrl}?token=${token}`;
+
+        const msg = `المكرم المعلم/الموظف: ${person.name} المحترم،\nالسلام عليكم ورحمة الله وبركاته..\nنأمل تعبئة الإفادة والتوقيع عبر الرابط:\n${shortUrl}`;
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    function sendBackToAdmin(modelNum) {
+    async function submitTeacherResponse(modelNum) {
         const excuseText = modelNum === '1' ? document.getElementById('m1_excuse').value : document.getElementById('m2_excuse').value;
         const staffSig = modelNum === '1' ? document.getElementById('img_sigStaff1').src : document.getElementById('img_sigStaff2').src;
 
@@ -1120,15 +1144,25 @@
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        let payload = shortDecode(urlParams.get('d')) || {};
+        const token = urlParams.get('token');
 
-        payload.r = 'done';
-        payload.exc = excuseText;
-        payload.tSig = staffSig;
+        const { error } = await supabaseClient
+            .from('disputes')
+            .update({
+                teacher_excuse: excuseText,
+                teacher_sig: staffSig,
+                teacher_replied_at: new Date(),
+                status: 'pending_admin'
+            })
+            .eq('token', token);
 
-        const encodedData = shortEncode(payload);
+        if (error) {
+            alert('حدث خطأ أثناء التحديث: ' + error.message);
+            return;
+        }
+
         const baseUrl = window.location.href.split('?')[0];
-        const returnUrl = `${baseUrl}?d=${encodedData}`;
+        const returnUrl = `${baseUrl}?token=${token}`;
 
         const adminPhone = "966553369243";
         const staffIdx = document.getElementById(modelNum === '1' ? 'm1_name_select' : 'm2_name_select').value;
